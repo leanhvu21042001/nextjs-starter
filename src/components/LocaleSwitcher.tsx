@@ -4,8 +4,7 @@ import type { FC } from 'react'
 import Cookies from 'js-cookie'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
-import { Select } from '@/components/ui'
-import { Box } from '@/components/ui/box'
+import { Box, Select } from '@/components/ui'
 import {
   DEFAULT_LOCALE,
   LOCALES,

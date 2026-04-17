@@ -25,6 +25,8 @@ import 'react-data-grid/lib/styles.css'
 
 import {
   Button,
+  Box,
+  Inline,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -944,7 +946,7 @@ function AppDataGrid<TRow, TSummaryRow>({
 
   return (
     <>
-      <div className="mb-2 flex flex-col gap-2">
+      <Box className="mb-2 flex flex-col gap-2">
         <GridToolbar
           selectedCount={selectedRows.size}
           disabledActions={toolbarConfig?.disabledActions}
@@ -974,7 +976,7 @@ function AppDataGrid<TRow, TSummaryRow>({
           writeError={writeError}
         />
 
-        <div className="flex flex-wrap items-center gap-2">
+        <Box className="flex flex-wrap items-center gap-2">
           {isSearch ? (
             <Input
               onChange={(event) => {
@@ -990,8 +992,8 @@ function AppDataGrid<TRow, TSummaryRow>({
           <Button type="button" size="sm" variant="outline" onClick={handleExportToCsv}>
             Export to CSV
           </Button>
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       {copiedCell && (
         <style>
@@ -1053,17 +1055,17 @@ function AppDataGrid<TRow, TSummaryRow>({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid max-h-[60vh] grid-cols-1 gap-3 overflow-auto">
+          <Box className="grid max-h-[60vh] grid-cols-1 gap-3 overflow-auto">
             {formFields.map((field) => (
-              <div key={field.key} className="flex flex-col gap-1">
+              <Box key={field.key} className="flex flex-col gap-1">
                 <Label>{field.label}</Label>
                 {renderFormField(field)}
                 {formErrors[field.key] && (
-                  <span className="text-xs text-red-600">{formErrors[field.key]}</span>
+                  <Inline className="text-xs text-red-600">{formErrors[field.key]}</Inline>
                 )}
-              </div>
+              </Box>
             ))}
-          </div>
+          </Box>
 
           <DialogFooter>
             <Button

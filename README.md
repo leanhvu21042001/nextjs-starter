@@ -21,6 +21,85 @@ Defaults:
 
 ---
 
+## UI Library Conventions
+
+UI components are exported from `src/components/ui/index.ts`.
+
+### Semantic wrappers
+
+To keep JSX semantic and consistent across the app, use dedicated semantic components from `@/components/ui`:
+
+- `Section` -> `<section>`
+- `Article` -> `<article>`
+- `Aside` -> `<aside>`
+- `Header` -> `<header>`
+- `Nav` -> `<nav>`
+- `Main` -> `<main>`
+- `Footer` -> `<footer>`
+
+### Content wrappers
+
+- `Box`: block container (maps to `<div>`) for layout/composition
+- `Inline`: inline container (maps to `<span>`) for inline text fragments/badges/messages
+- `Heading`: heading wrapper (`h1..h6`) via `level`
+- `Paragraph`: paragraph wrapper (`<p>`)
+
+> Note: `Box` does not support polymorphic props like `as`/`type`. Use semantic components or `Inline` instead.
+
+### Form components
+
+- `Form`: maps to native `<form>` element
+- `FormProvider`: react-hook-form provider export
+- `FormField`, `FormItem`, `FormControl`, `FormLabel`, `FormDescription`, `FormMessage`
+
+Example:
+
+```tsx
+import { Form, FormProvider } from '@/components/ui'
+
+;<FormProvider {...formMethods}>
+  <Form onSubmit={formMethods.handleSubmit(onSubmit)}>{/* form fields */}</Form>
+</FormProvider>
+```
+
+---
+
+## UI `Image` Component (SEO + Performance)
+
+`Image` is a wrapper around `next/image` with practical defaults for SEO and styling.
+
+Source: `src/components/ui/image.tsx`
+
+### Features
+
+- Requires `alt` for accessibility/SEO.
+- Uses `loading="lazy"` by default (unless `priority` is enabled).
+- Uses default `sizes="100vw"` for responsive behavior.
+- Optional `caption` rendered via semantic `<figure>/<figcaption>`.
+- Optional style flags:
+  - `rounded` (default: `true`)
+  - `shadow` (default: `false`)
+- Supports `containerClassName` for figure wrapper and `className` for image styling.
+
+### Example
+
+```tsx
+import { Image } from '@/components/ui'
+
+;<Image
+  src="/images/hero.jpg"
+  alt="Dashboard analytics overview"
+  width={1200}
+  height={675}
+  sizes="(max-width: 768px) 100vw, 1200px"
+  priority
+  caption="Analytics dashboard preview"
+  shadow
+/>
+```
+
+---
+
 ## Kiến trúc Mapper + DTO
 
 Mục tiêu: chuẩn hóa và type-safe toàn bộ luồng dữ liệu:

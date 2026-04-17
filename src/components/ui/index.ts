@@ -29,11 +29,36 @@ export type { EmptyProps } from './empty'
 export { Box } from './box'
 export type { BoxProps } from './box'
 
+export { Inline } from './inline'
+export type { InlineProps } from './inline'
+
+export { Paragraph } from './paragraph'
+export type { ParagraphProps } from './paragraph'
+
+export { Heading } from './heading'
+export type { HeadingProps } from './heading'
+
+export { Section, Article, Aside, Header, Nav, Main, Footer } from './semantic'
+export type {
+  SectionProps,
+  ArticleProps,
+  AsideProps,
+  HeaderProps,
+  NavProps,
+  MainProps,
+  FooterProps,
+} from './semantic'
+
 export { Link } from './link'
+export type { LinkProps } from './link'
+
+export { Image } from './image'
+export type { ImageProps } from './image'
 
 // ─── Form (react-hook-form integration) ──────────────────────────────────────
 export {
   Form,
+  FormProvider,
   FormControl,
   FormDescription,
   FormField,

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { getAboutPageContent } from './page.content'
-import { Link } from '@/components/ui/link'
+import { Box, Heading, Link, Paragraph } from '@/components/ui'
 import { hasLocale } from '@/lib/i18n/config'
 import { createLocalizedMetadata } from '@/lib/seo'
 
@@ -32,21 +32,23 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
 
   return (
     <main className="py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="text-base font-semibold leading-7 text-green-600">{content.eyebrow}</h2>
-          <p className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+      <Box className="mx-auto max-w-7xl px-6 lg:px-8">
+        <Box className="mx-auto max-w-2xl lg:text-center">
+          <Heading level={2} className="text-base font-semibold leading-7 text-green-600">
+            {content.eyebrow}
+          </Heading>
+          <Paragraph className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             {content.heading}
-          </p>
-          <p className="mt-6 text-lg leading-8 text-slate-600">{content.body}</p>
+          </Paragraph>
+          <Paragraph className="mt-6 text-lg leading-8 text-slate-600">{content.body}</Paragraph>
 
-          <div className="mt-10">
+          <Box className="mt-10">
             <Link href="/" className="text-green-600 font-semibold hover:text-green-500">
               {content.backHome}
             </Link>
-          </div>
-        </div>
-      </div>
+          </Box>
+        </Box>
+      </Box>
     </main>
   )
 }

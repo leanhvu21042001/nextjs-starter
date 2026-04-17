@@ -10,11 +10,20 @@ import {
   type FieldValues,
 } from 'react-hook-form'
 import { cn } from '@/lib/utils'
-import { Label } from '@/components/ui/label'
+import { Label } from './label'
 
-// ─── Form (wraps FormProvider) ───────────────────────────────────────────────
+// ─── Form (HTML form) ────────────────────────────────────────────────────────
 
-const Form = FormProvider
+type FormProps = React.ComponentProps<'form'>
+
+const Form = React.forwardRef<HTMLFormElement, FormProps>(({ className, ...props }, ref) => {
+  return <form ref={ref} className={cn(className)} {...props} />
+})
+Form.displayName = 'Form'
+
+// ─── FormProvider (react-hook-form provider) ────────────────────────────────
+
+const FormProviderRoot = FormProvider
 
 // ─── FormField context ───────────────────────────────────────────────────────
 
@@ -153,6 +162,7 @@ FormMessage.displayName = 'FormMessage'
 
 export {
   Form,
+  FormProviderRoot as FormProvider,
   FormControl,
   FormDescription,
   FormField,

@@ -13,6 +13,8 @@ type AppLinkProps = Omit<React.ComponentPropsWithoutRef<typeof NextLink>, 'href'
   href: string
 }
 
+export type LinkProps = AppLinkProps
+
 export const Link: FC<AppLinkProps> = ({ href, ...props }) => {
   const { children, ...rest } = props as PropsWithChildren<AppLinkProps>
   const params = useParams<{ locale?: string | string[] }>()

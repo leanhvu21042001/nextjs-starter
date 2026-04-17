@@ -7,6 +7,7 @@ import {
   type TComparator,
   type TGenColumn,
 } from '@/components/AppDataGrid'
+import { Box } from '@/components/ui'
 import { useMemo, useRef, useState } from 'react'
 import { Direction, renderTextEditor, SelectCellFormatter } from 'react-data-grid'
 import { createPortal } from 'react-dom'
@@ -195,7 +196,7 @@ const genColumns: TGenColumn<Row, SummaryRow> = (direction: Direction) => {
       },
       renderEditCell({ row, onRowChange, onClose }) {
         return createPortal(
-          <div
+          <Box
             dir={direction}
             style={{
               position: 'absolute',
@@ -238,7 +239,7 @@ const genColumns: TGenColumn<Row, SummaryRow> = (direction: Direction) => {
                 </button>
               </menu>
             </dialog>
-          </div>,
+          </Box>,
           document.body,
         )
       },

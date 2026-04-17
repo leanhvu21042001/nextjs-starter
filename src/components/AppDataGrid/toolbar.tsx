@@ -1,5 +1,6 @@
-import { Button, Badge } from '@/components/ui'
+import { Button, Badge, Inline } from '@/components/ui'
 import type { GridToolbarViewProps } from './toolbar.types'
+import { Box } from '@/components/ui'
 
 const isDisabled = (
   action: 'add' | 'save' | 'update' | 'delete' | 'refresh',
@@ -29,8 +30,8 @@ export function GridToolbar<TRow>({
   const successItems = mutationResults.filter((item) => item.status === 'success')
 
   return (
-    <div className="mb-3 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-3">
-      <div className="flex flex-wrap items-center gap-2">
+    <Box className="mb-3 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-3">
+      <Box className="flex flex-wrap items-center gap-2">
         <Button
           type="button"
           size="sm"
@@ -84,22 +85,22 @@ export function GridToolbar<TRow>({
           {isRefreshing ? 'Refreshing...' : 'Refresh'}
         </Button>
 
-        <div className="ml-auto flex items-center gap-2">
+        <Box className="ml-auto flex items-center gap-2">
           <Badge variant="success">Success: {successItems.length}</Badge>
           <Badge variant="destructive">Failed: {failedItems.length}</Badge>
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       {(writeError || readError) && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-2 text-sm text-red-700">
+        <Box className="rounded-md border border-red-200 bg-red-50 p-2 text-sm text-red-700">
           {writeError ?? readError}
-        </div>
+        </Box>
       )}
 
       {failedItems.length > 0 && (
-        <div className="rounded-md border border-amber-200 bg-amber-50 p-3">
-          <div className="mb-2 flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-amber-900">Failed mutations</span>
+        <Box className="rounded-md border border-amber-200 bg-amber-50 p-3">
+          <Box className="mb-2 flex flex-wrap items-center gap-2">
+            <Inline className="text-sm font-medium text-amber-900">Failed mutations</Inline>
             <Button type="button" size="sm" variant="secondary" onClick={onRetryAll}>
               Retry all
             </Button>
@@ -112,11 +113,11 @@ export function GridToolbar<TRow>({
             >
               Retry selected ({selectedFailedKeys.size})
             </Button>
-          </div>
+          </Box>
 
-          <div className="max-h-44 space-y-1 overflow-auto pr-1">
+          <Box className="max-h-44 space-y-1 overflow-auto pr-1">
             {failedItems.map((item) => (
-              <div
+              <Box
                 key={`${item.action}:${item.key}`}
                 className="flex items-center gap-2 rounded border border-amber-200 bg-white p-2"
               >
@@ -125,20 +126,20 @@ export function GridToolbar<TRow>({
                   checked={selectedFailedKeys.has(item.key)}
                   onChange={() => onToggleFailed(item.key)}
                 />
-                <span className="text-xs text-slate-700">
+                <Inline className="text-xs text-slate-700">
                   {item.action.toUpperCase()} - key: {item.key}
-                </span>
-                <span className="min-w-0 flex-1 truncate text-xs text-red-700">
+                </Inline>
+                <Inline className="min-w-0 flex-1 truncate text-xs text-red-700">
                   {item.error ?? item.message ?? 'Unknown error'}
-                </span>
+                </Inline>
                 <Button type="button" size="sm" variant="outline" onClick={() => onRetryOne(item)}>
                   Retry
                 </Button>
-              </div>
+              </Box>
             ))}
-          </div>
-        </div>
+          </Box>
+        </Box>
       )}
-    </div>
+    </Box>
   )
 }
