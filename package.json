@@ -2,6 +2,11 @@
   "name": "nextjs-starter",
   "version": "0.1.0",
   "private": true,
+  "author": {
+    "email": "leanhvu21042001@gmail.com",
+    "name": "Le Anh Vu",
+    "url": "mailto:leanhvu21042001@gmail.com"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

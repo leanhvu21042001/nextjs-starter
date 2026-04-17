@@ -1,28 +1,77 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export function proxy(request: NextRequest) {
-  // const token = request.cookies.get('token')?.value
-  // const { pathname } = request.nextUrl
+import { DEFAULT_LOCALE, LOCALE_COOKIE_NAME, normalizeLocale } from '@/i18n/config'
+import { getPathLocale } from '@/i18n/routing'
 
-  // // Protected routes (Dashboard) - Redirect to login if unauthenticated
-  // if (pathname.startsWith('/dashboard')) {
-  //   if (!token) {
-  //     return NextResponse.redirect(new URL('/login', request.url))
-  //   }
-  // }
+const getLocaleFromQuery = (request: NextRequest) =>
+  normalizeLocale(request.nextUrl.searchParams.get('lang'))
 
-  // // Auth routes (Login/Register) - Redirect to dashboard if already authenticated
-  // if (pathname.startsWith('/login') || pathname.startsWith('/register')) {
-  //   if (token) {
-  //     return NextResponse.redirect(new URL('/dashboard', request.url))
-  //   }
-  // }
+const getLocaleFromCookie = (request: NextRequest) =>
+  normalizeLocale(request.cookies.get(LOCALE_COOKIE_NAME)?.value)
 
-  return NextResponse.next()
+const getLocaleFromAcceptLanguage = (request: NextRequest) => {
+  const acceptLanguage = request.headers.get('accept-language')
+  if (!acceptLanguage) return null
+
+  const candidates = acceptLanguage
+    .split(',')
+    .map((value) => value.split(';')[0]?.trim())
+    .filter(Boolean)
+
+  for (const candidate of candidates) {
+    const locale = normalizeLocale(candidate)
+    if (locale) return locale
+  }
+
+  return null
 }
 
-// Chỉ match các routes cần chạy middleware
+const resolvePreferredLocale = (request: NextRequest) =>
+  getLocaleFromQuery(request) ??
+  getLocaleFromCookie(request) ??
+  getLocaleFromAcceptLanguage(request) ??
+  DEFAULT_LOCALE
+
+const withLocaleHeader = (request: NextRequest, locale: string) => {
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-locale', locale)
+  return requestHeaders
+}
+
+export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const localeInPath = getPathLocale(pathname)
+
+  if (localeInPath) {
+    const response = NextResponse.next({
+      request: {
+        headers: withLocaleHeader(request, localeInPath),
+      },
+    })
+
+    response.cookies.set(LOCALE_COOKIE_NAME, localeInPath, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+    })
+    return response
+  }
+
+  const locale = resolvePreferredLocale(request)
+  const rewriteUrl = request.nextUrl.clone()
+  rewriteUrl.pathname =
+    locale === DEFAULT_LOCALE ? `/${DEFAULT_LOCALE}${pathname}` : `/${locale}${pathname}`
+
+  const response = NextResponse.rewrite(rewriteUrl, {
+    request: {
+      headers: withLocaleHeader(request, locale),
+    },
+  })
+
+  response.cookies.set(LOCALE_COOKIE_NAME, locale, { path: '/', maxAge: 60 * 60 * 24 * 365 })
+
+  return response
+}
+
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/register'],
+  matcher: '/((?!api|static|assets|robots|sitemap|sw|service-worker|manifest|.*\\..*|_next).*)',
 }

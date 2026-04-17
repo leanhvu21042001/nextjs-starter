@@ -1,68 +1,45 @@
-import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-import { Toaster } from 'react-hot-toast'
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import { headers } from 'next/headers'
+
+import { DEFAULT_LOCALE, getTextDirection, normalizeLocale } from '@/i18n/config'
+import { getSiteUrl } from '@/lib/seo'
+
 import './globals.css'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-})
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-})
-
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-  themeColor: '#16a34a', // tailwind green-600
-}
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  metadataBase: new URL(getSiteUrl()),
   title: {
-    default: 'Next.js Clean Architecture | Quản lý DataGrid',
-    template: '%s | N-Starter',
+    default: 'Next.js Starter',
+    template: '%s | Next.js Starter',
   },
   description:
-    'Hệ thống quản lý dữ liệu hiệu suất cao trang bị Atomic Design, Next.js App Router, Zod validation và React Data Grid.',
-  keywords: ['Next.js', 'React', 'DataGrid', 'Atomic Design', 'Zod', 'Dashboard'],
-  authors: [{ name: 'N-Starter Team' }],
-  creator: 'N-Starter',
+    'Modern multilingual Next.js starter with clean architecture, form validation, and scalable UI components.',
+  applicationName: 'Next.js Starter',
   openGraph: {
     type: 'website',
-    locale: 'vi_VN',
-    url: '/',
-    title: 'Next.js Clean Architecture | Quản lý DataGrid',
+    siteName: 'Next.js Starter',
+    title: 'Next.js Starter',
     description:
-      'Hệ thống quản lý dữ liệu hiệu suất cao trang bị Atomic Design, Next.js App Router, Zod validation và React Data Grid.',
-    siteName: 'N-Starter Platform',
+      'Modern multilingual Next.js starter with clean architecture, form validation, and scalable UI components.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Next.js Clean Architecture | Quản lý DataGrid',
+    title: 'Next.js Starter',
     description:
-      'Hệ thống quản lý dữ liệu hiệu suất cao trang bị Atomic Design, Next.js App Router, Zod validation và React Data Grid.',
-  },
-  robots: {
-    index: true,
-    follow: true,
+      'Modern multilingual Next.js starter with clean architecture, form validation, and scalable UI components.',
   },
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const requestHeaders = await headers()
+  const locale = normalizeLocale(requestHeaders.get('x-locale')) ?? DEFAULT_LOCALE
+
   return (
-    <html lang="vi" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>
-        {children}
-        <Toaster position="top-center" />
-      </body>
+    <html lang={locale} dir={getTextDirection()}>
+      <body className={inter.className}>{children}</body>
     </html>
   )
 }

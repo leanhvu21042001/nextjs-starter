@@ -1,12 +1,22 @@
 import type { MetadataRoute } from 'next'
 
-export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: ['/dashboard/', '/login', '/register'], // Thường chặn dashboard và auth auth pages khỏi bot index
-    },
-    sitemap: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/sitemap.xml`,
-  }
-}
+import { LOCALES } from '@/i18n/config'
+import { getLocalizedUrl } from '@/i18n/routing'
+import { getAbsoluteUrl, getSiteUrl } from '@/lib/seo'
+
+const getAllMultilingualUrls = (urls: string[]) =>
+  urls.flatMap((url) => LOCALES.map((locale) => getLocalizedUrl(url, locale)))
+
+const DISALLOWED_ROUTES = ['/login', '/register', '/dashboard']
+
+const robots = (): MetadataRoute.Robots => ({
+  rules: {
+    userAgent: '*',
+    allow: ['/'],
+    disallow: getAllMultilingualUrls(DISALLOWED_ROUTES),
+  },
+  host: getSiteUrl(),
+  sitemap: getAbsoluteUrl('/sitemap.xml'),
+})
+
+export default robots

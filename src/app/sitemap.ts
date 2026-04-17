@@ -1,26 +1,26 @@
 import type { MetadataRoute } from 'next'
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+import { DEFAULT_LOCALE } from '@/i18n/config'
+import { getLocaleAlternates, getLocalizedAbsoluteUrl } from '@/lib/seo'
 
-  return [
-    {
-      url: `${baseUrl}`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 1,
+const INDEXABLE_ROUTES = [
+  { pathname: '/', priority: 1, changeFrequency: 'weekly' as const },
+  { pathname: '/about', priority: 0.7, changeFrequency: 'monthly' as const },
+  { pathname: '/contact', priority: 0.7, changeFrequency: 'monthly' as const },
+]
+
+const sitemap = (): MetadataRoute.Sitemap =>
+  INDEXABLE_ROUTES.map((route) => ({
+    url: getLocalizedAbsoluteUrl(route.pathname, DEFAULT_LOCALE),
+    lastModified: new Date(),
+    changeFrequency: route.changeFrequency,
+    priority: route.priority,
+    alternates: {
+      languages: {
+        ...getLocaleAlternates(route.pathname),
+        'x-default': getLocalizedAbsoluteUrl(route.pathname, DEFAULT_LOCALE),
+      },
     },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.5,
-    },
-  ]
-}
+  }))
+
+export default sitemap
