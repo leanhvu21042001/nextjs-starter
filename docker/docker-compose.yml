@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: nextjs-starter:prod
+    container_name: nextjs-starter
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    env_file:
+      - ../.env.local
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    volumes:
+      - ../log:/app/log

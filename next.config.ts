@@ -56,6 +56,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   /* config options here */
   typedRoutes: true,
+  output: 'standalone',
   async headers() {
     return [
       {

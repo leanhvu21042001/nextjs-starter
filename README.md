@@ -19,6 +19,52 @@ Defaults:
 - `development` -> `debug`
 - `production` -> `info`
 
+### Log files
+
+This project can persist logs to `log/*.log` via `POST /api/log`.
+
+If you want to disable file persistence from the browser logger, set:
+
+- `NEXT_PUBLIC_LOG_TO_FILE=false`
+
+---
+
+## Docker (Production)
+
+This project includes a multi-stage production setup in the `docker/` folder.
+
+### 1. Build image
+
+```bash
+docker build -f docker/Dockerfile -t nextjs-starter:prod .
+```
+
+### 2. Run container
+
+```bash
+docker run --name nextjs-starter -p 3000:3000 --env-file .env.local -v ${PWD}/log:/app/log nextjs-starter:prod
+```
+
+Open: `http://localhost:3000`
+
+### 3. Run with Docker Compose
+
+```bash
+docker compose -f docker/docker-compose.yml up -d --build
+```
+
+Stop:
+
+```bash
+docker compose -f docker/docker-compose.yml down
+```
+
+Notes:
+
+- Production image uses Next.js standalone output (`output: 'standalone'`).
+- Container runs as a non-root user.
+- `./log` is mounted to `/app/log` so logs persist outside the container.
+
 ---
 
 ## UI Library Conventions
@@ -55,9 +101,8 @@ To keep JSX semantic and consistent across the app, use dedicated semantic compo
 Example:
 
 ```tsx
-import { Form, FormProvider } from '@/components/ui'
-
-;<FormProvider {...formMethods}>
+import { Form, FormProvider } from '@/components/ui';
+<FormProvider {...formMethods}>
   <Form onSubmit={formMethods.handleSubmit(onSubmit)}>{/* form fields */}</Form>
 </FormProvider>
 ```
@@ -84,9 +129,8 @@ Source: `src/components/ui/image.tsx`
 ### Example
 
 ```tsx
-import { Image } from '@/components/ui'
-
-;<Image
+import { Image } from '@/components/ui';
+<Image
   src="/images/hero.jpg"
   alt="Dashboard analytics overview"
   width={1200}
