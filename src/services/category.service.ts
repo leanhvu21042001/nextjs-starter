@@ -1,7 +1,7 @@
 import fetcher from '@/lib/fetcher'
 import { categoryMapper } from '@/schemas/category/category.mapper'
 import type { ApiPaginatedResponse, ApiResponse } from '@/lib/api-response'
-import type { CategoryModel, CategoryUiDto } from '@/types/category.types'
+import type { CategoryModel, CategoryUiDto } from '@/schemas/category/category.types'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // QUERY PARAMS

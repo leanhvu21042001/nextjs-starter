@@ -6,7 +6,7 @@ import {
   categoryDeletePayloadSchema,
   categoryResponseSchema,
 } from './category.schema'
-import type { CategoryModel } from '@/types/category.types'
+import type { CategoryModel } from '@/schemas/category/category.types'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPER — tự động tạo slug từ name nếu không được điền

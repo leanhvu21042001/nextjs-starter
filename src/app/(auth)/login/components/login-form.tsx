@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { authService } from '@/services/auth.service'
 import { loginUiSchema } from '@/schemas/auth/auth.schema'
-import type { LoginUiDto } from '@/types/auth.types'
+import type { LoginUiDto } from '@/schemas/auth/auth.types'
 import { getErrorMessage } from '@/lib/utils'
 
 export function LoginForm() {

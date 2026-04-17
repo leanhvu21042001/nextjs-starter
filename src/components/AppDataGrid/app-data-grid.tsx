@@ -1,13 +1,14 @@
 'use client'
-import { exportToCsv } from '@/lib/utils'
-import { CSSProperties, Key, useMemo, useRef, useState } from 'react'
+import { deepPickStringValue, exportToCsv } from '@/lib/utils'
+import { CSSProperties, useMemo, useRef, useState } from 'react'
 import {
   CalculatedColumn,
   CellCopyArgs,
+  CellKeyboardEvent,
+  CellKeyDownArgs,
   CellMouseArgs,
   CellMouseEvent,
   CellPasteArgs,
-  Column,
   DataGrid,
   DataGridHandle,
   Direction,
@@ -23,71 +24,14 @@ import 'react-data-grid/lib/styles.css'
 
 import { Input, Empty } from '../ui'
 import useDebounce from '@/hooks/use-debounce'
-
-enum EColumnType {
-  DatePicker = 'DatePicker',
-  TextEditor = 'TextEditor',
-  Checkbox = 'Checkbox',
-  Select = 'Select',
-  MultipleSelect = 'MultipleSelect',
-  Cascade = 'Cascade',
-  ToolBar = 'ToolBar',
-  Password = 'Password',
-  TextInput = 'TextInput',
-  NumberInput = 'NumberInput',
-  Switch = 'Switch',
-  Badge = 'Badge',
-  Expanded = 'Expanded',
-  Tooltip = 'Tooltip',
-  ProgressBar = 'Progress',
-  TreeView = 'TreeView',
-}
-
-type TKeyGrid = Key
-type TComparator<TRow> = (a: TRow, b: TRow) => number
-type TColumn<TRow, TSummaryRow> = Column<TRow, TSummaryRow> & {
-  type?: EColumnType
-  visible?: boolean
-  options?: OptionsSelect[]
-}
-type TGenColumn<TRow, TSummaryRow> = (
-  direction: Direction,
-) => readonly TColumn<NoInfer<TRow>, NoInfer<TSummaryRow>>[]
-
-type OptionsSelect = { label: string; value: unknown }
-
-export enum EGridSelectionMode {
-  multi = 'multi',
-  single = 'single',
-  none = 'none',
-}
-export const keyNoRow = 'STT' // number of row.
-
-function isNoSearch<TRow, TSummaryRow>(column: TColumn<TRow, TSummaryRow>): boolean {
-  // Không hiển thị giao diện không search.
-  if (column.visible === false) return true // visible có thể null.
-  // STT không search.
-  if (column.key === keyNoRow) return true
-  // Checkbox không search.
-  if (column.type === 'Checkbox') return true
-
-  return false
-}
-
-type TDeepPickStringValue =
-  | { props?: { children?: TDeepPickStringValue } }
-  | string
-  | number
-  | undefined
-const deepPickStringValue = (param: TDeepPickStringValue) => {
-  if (typeof param === 'string' || typeof param === 'number') {
-    return param
-  }
-  if (typeof param === 'object' && param !== null && Object.hasOwnProperty.call(param, 'props')) {
-    return deepPickStringValue(param?.props?.children as TDeepPickStringValue)
-  }
-  return undefined
-}
+import type {
+  OptionsSelect,
+  TColumn,
+  TComparator,
+  TGenColumn,
+  TKeyGrid,
+} from './app-data-grid.types'
+import { isNoSearch } from './app-data-grid.utils'
 
 function AppDataGrid<TRow, TSummaryRow>({
   // simple config
@@ -241,7 +185,7 @@ function AppDataGrid<TRow, TSummaryRow>({
     return row
   }
 
-  function rowClass(row: NoInfer<TRow>, rowIdx: number) {
+  function rowClass(row: NoInfer<TRow>) {
     // console.log({
     //   row,
     //   rowIdx,
@@ -256,6 +200,13 @@ function AppDataGrid<TRow, TSummaryRow>({
     return 'custom-row-class'
   }
 
+  function handleDisabledRow(row: NoInfer<TRow>) {
+    return row[rowKeyGetterString as keyof TRow] === 'id_2'
+  }
+
+  function handleRowKeyGetter(row: TRow) {
+    return row[rowKeyGetterString as keyof TRow] as unknown as TKeyGrid
+  }
   function handleExportToCsv() {
     flushSync(() => {
       setIsExporting(true)
@@ -279,6 +230,14 @@ function AppDataGrid<TRow, TSummaryRow>({
     }
   }
 
+  function handleCellKeyDown(
+    args: CellKeyDownArgs<NoInfer<TRow>, NoInfer<TSummaryRow>>,
+    event: CellKeyboardEvent,
+  ) {
+    if (event.key === 'Escape') {
+      setCopiedCell(null)
+    }
+  }
   const handleDoubleClick = (
     args: CellMouseArgs<NoInfer<TRow>, NoInfer<TSummaryRow>>,
     event: CellMouseEvent,
@@ -364,49 +323,38 @@ function AppDataGrid<TRow, TSummaryRow>({
           ...(style ?? {}),
         }}
         aria-label={ariaLabel}
-        columns={columns}
-        rows={rowsBySearchTerm}
         defaultColumnOptions={{
           sortable: true,
           resizable: true,
         }}
+        rowHeight={30}
+        headerRowHeight={38}
+        className="fill-grid rdg-light rdg-custom"
+        columns={columns}
+        rows={rowsBySearchTerm}
         selectedRows={selectedRows}
-        rowKeyGetter={(row: TRow) => row[rowKeyGetterString as keyof TRow] as unknown as TKeyGrid}
-        onSelectedRowsChange={onSelectedRowsChange}
-        onRowsChange={handleRowsChange}
         sortColumns={sortColumns}
-        onSortColumnsChange={setSortColumns}
         topSummaryRows={summaryRows}
         bottomSummaryRows={summaryRows}
-        className="fill-grid rdg-light rdg-custom"
         direction={direction}
         enableVirtualization={!isExporting}
-        //
+        renderers={{ noRowsFallback: <Empty content="No rows available" /> }}
+        rowKeyGetter={handleRowKeyGetter}
+        onSelectedRowsChange={onSelectedRowsChange}
+        onRowsChange={handleRowsChange}
+        onSortColumnsChange={setSortColumns}
         onFill={handleFill}
         onCellCopy={handleCellCopy}
         onCellPaste={handleCellPaste}
-        rowHeight={30}
-        // isRowSelectionDisabled={(row) => row[rowKeyGetterString as keyof TRow] === 'id_2'}
+        isRowSelectionDisabled={handleDisabledRow}
         rowClass={rowClass}
-        renderers={{
-          noRowsFallback: <Empty content="No rows available" />,
-        }}
         onCellClick={handleCellClick}
-        onCellKeyDown={(_, event) => {
-          if (event.key === 'Escape') {
-            setCopiedCell(null)
-          }
-        }}
-        // from eport
-        // selectedRows={selectedRows}
-        headerRowHeight={38}
-        // onSelectedCellChange={typeof onFocus === 'function' ? onFocus : () => {}}
+        onCellKeyDown={handleCellKeyDown}
         onCellDoubleClick={handleDoubleClick}
-        // handle TreeDataGrid
         onScroll={handleScroll}
       />
     </>
   )
 }
 
-export { AppDataGrid, type TComparator, type TGenColumn }
+export { AppDataGrid }

@@ -1,6 +1,6 @@
 'use client'
 
-import { AppDataGrid, TComparator, TGenColumn } from '@/components/AppDataGrid/data-grid'
+import { AppDataGrid, type TComparator, type TGenColumn } from '@/components/AppDataGrid'
 import { useState } from 'react'
 import { Direction, renderTextEditor, SelectCellFormatter } from 'react-data-grid'
 import { createPortal } from 'react-dom'

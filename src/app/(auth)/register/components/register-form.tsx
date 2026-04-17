@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { authService } from '@/services/auth.service'
 import { registerUiSchema } from '@/schemas/auth/auth.schema'
-import type { RegisterUiDto } from '@/types/auth.types'
+import type { RegisterUiDto } from '@/schemas/auth/auth.types'
 import { getErrorMessage } from '@/lib/utils'
 
 export function RegisterForm() {

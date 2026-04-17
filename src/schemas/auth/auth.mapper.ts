@@ -6,7 +6,7 @@ import {
   registerPayloadSchema,
   authResponseSchema,
 } from './auth.schema'
-import type { AuthModel } from '@/types/auth.types'
+import type { AuthModel } from '@/schemas/auth/auth.types'
 import { z } from 'zod'
 
 // Fallback schemas for updates/deletes that don't apply to login
