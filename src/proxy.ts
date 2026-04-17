@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { DEFAULT_LOCALE, LOCALE_COOKIE_NAME, normalizeLocale } from '@/i18n/config'
-import { getPathLocale } from '@/i18n/routing'
+import { DEFAULT_LOCALE, LOCALE_COOKIE_NAME, normalizeLocale } from '@/lib/i18n/config'
+import { getPathLocale } from '@/lib/i18n/routing'
 
 const getLocaleFromQuery = (request: NextRequest) =>
   normalizeLocale(request.nextUrl.searchParams.get('lang'))

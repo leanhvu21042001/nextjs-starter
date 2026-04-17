@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
-import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/config'
-import { getLocalizedUrl } from '@/i18n/routing'
+import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/lib/i18n/config'
+import { getLocalizedUrl } from '@/lib/i18n/routing'
 
 const FALLBACK_SITE_URL = 'http://localhost:3000'
 

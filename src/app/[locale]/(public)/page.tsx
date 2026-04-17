@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 
 import PageBody from './page.body'
 import { getPublicPageContent } from './page.content'
-import { hasLocale } from '@/i18n/config'
+import { hasLocale } from '@/lib/i18n/config'
 import { createLocalizedMetadata } from '@/lib/seo'
 
 export async function generateMetadata({

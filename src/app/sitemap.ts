@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-import { DEFAULT_LOCALE } from '@/i18n/config'
+import { DEFAULT_LOCALE } from '@/lib/i18n/config'
 import { getLocaleAlternates, getLocalizedAbsoluteUrl } from '@/lib/seo'
 
 const INDEXABLE_ROUTES = [

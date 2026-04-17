@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, LOCALES, type Locale, hasLocale } from '@/i18n/config'
+import { DEFAULT_LOCALE, LOCALES, type Locale, hasLocale } from '@/lib/i18n/config'
 
 const ensureLeadingSlash = (pathname: string): string =>
   pathname.startsWith('/') ? pathname : `/${pathname}`

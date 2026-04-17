@@ -5,7 +5,7 @@ import { getContactPageContent } from './page.content'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { hasLocale } from '@/i18n/config'
+import { hasLocale } from '@/lib/i18n/config'
 import { createLocalizedMetadata } from '@/lib/seo'
 
 export async function generateMetadata({

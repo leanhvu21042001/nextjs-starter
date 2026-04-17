@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 
-import { LOCALES, hasLocale } from '@/i18n/config'
+import { LOCALES, hasLocale } from '@/lib/i18n/config'
 
 export const generateStaticParams = async () => LOCALES.map((locale) => ({ locale }))
 

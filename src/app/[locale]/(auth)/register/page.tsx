@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { RegisterForm } from './components/register-form'
 import { getRegisterPageContent } from './page.content'
 import { Link } from '@/components/ui/link'
-import { hasLocale } from '@/i18n/config'
+import { hasLocale } from '@/lib/i18n/config'
 import { createLocalizedMetadata } from '@/lib/seo'
 
 /**

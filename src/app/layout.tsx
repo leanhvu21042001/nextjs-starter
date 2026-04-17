@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { headers } from 'next/headers'
 
-import { DEFAULT_LOCALE, getTextDirection, normalizeLocale } from '@/i18n/config'
+import { DEFAULT_LOCALE, getTextDirection, normalizeLocale } from '@/lib/i18n/config'
 import { getSiteUrl } from '@/lib/seo'
 
 import './globals.css'

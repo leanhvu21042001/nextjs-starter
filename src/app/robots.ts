@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 
-import { LOCALES } from '@/i18n/config'
-import { getLocalizedUrl } from '@/i18n/routing'
+import { LOCALES } from '@/lib/i18n/config'
+import { getLocalizedUrl } from '@/lib/i18n/routing'
 import { getAbsoluteUrl, getSiteUrl } from '@/lib/seo'
 
 const getAllMultilingualUrls = (urls: string[]) =>

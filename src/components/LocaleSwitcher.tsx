@@ -12,8 +12,8 @@ import {
   LOCALE_COOKIE_NAME,
   getLocaleDisplayName,
   hasLocale,
-} from '@/i18n/config'
-import { getLocalizedUrl, getPathLocale, stripLocaleFromPathname } from '@/i18n/routing'
+} from '@/lib/i18n/config'
+import { getLocalizedUrl, getPathLocale, stripLocaleFromPathname } from '@/lib/i18n/routing'
 
 export const LocaleSwitcher: FC = () => {
   const pathname = usePathname()

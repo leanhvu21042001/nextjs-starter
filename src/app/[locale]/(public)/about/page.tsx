@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 
 import { getAboutPageContent } from './page.content'
 import { Link } from '@/components/ui/link'
-import { hasLocale } from '@/i18n/config'
+import { hasLocale } from '@/lib/i18n/config'
 import { createLocalizedMetadata } from '@/lib/seo'
 
 export async function generateMetadata({

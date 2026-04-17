@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { getMetadataContent } from './metadata.content'
 import { getPublicLayoutContent } from './layout.content'
 import { Link } from '@/components/ui/link'
-import { hasLocale } from '@/i18n/config'
+import { hasLocale } from '@/lib/i18n/config'
 import { createLocalizedMetadata } from '@/lib/seo'
 import { LocaleSwitcher } from '@/components/LocaleSwitcher'
 

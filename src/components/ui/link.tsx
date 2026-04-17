@@ -4,8 +4,8 @@ import NextLink from 'next/link'
 import { useParams } from 'next/navigation'
 import type { FC, PropsWithChildren } from 'react'
 
-import { DEFAULT_LOCALE, hasLocale } from '@/i18n/config'
-import { getLocalizedUrl } from '@/i18n/routing'
+import { DEFAULT_LOCALE, hasLocale } from '@/lib/i18n/config'
+import { getLocalizedUrl } from '@/lib/i18n/routing'
 
 export const checkIsExternalLink = (href?: string): boolean => /^https?:\/\//.test(href ?? '')
 

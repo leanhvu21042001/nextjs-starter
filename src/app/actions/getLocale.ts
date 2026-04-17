@@ -1,6 +1,6 @@
 'use server'
 
-import { getRequestLocale } from '@/i18n/get-locale'
+import { getRequestLocale } from '@/lib/i18n/get-locale'
 
 export const myServerAction = async () => {
   const locale = await getRequestLocale()
