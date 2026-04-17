@@ -5,13 +5,13 @@ import Cookies from 'js-cookie'
 export const authService = {
   /**
    * Thay vì gọi API thật, hàm này giả lập hành vi login
-   * Trong thực tế: thay dòng Fake data bằng axios.post('/auth/login')
+   * Trong thực tế: thay dòng Fake data bằng fetcher.post('/auth/login')
    */
   async login(uiData: LoginUiDto): Promise<AuthModel> {
     const payload = authMapper.create(uiData)
 
     // TODO: Replace with real API call
-    // const { data } = await axiosInstance.post<ApiResponse<unknown>>('/auth/login', payload)
+    // const data = await fetcher.post<ApiResponse<unknown>>('/auth/login', payload)
 
     // -- Fake response --
     await new Promise((resolve) => setTimeout(resolve, 800)) // delay
@@ -44,7 +44,7 @@ export const authService = {
     const payload = registerMapper.create(uiData)
 
     // TODO: Gọi API đăng ký thực tế
-    // const { data } = await axiosInstance.post<ApiResponse<unknown>>('/auth/register', payload)
+    // const data = await fetcher.post<ApiResponse<unknown>>('/auth/register', payload)
 
     // -- Fake response --
     await new Promise((resolve) => setTimeout(resolve, 800)) // delay

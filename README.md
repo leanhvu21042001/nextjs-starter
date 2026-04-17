@@ -1,6 +1,6 @@
 # Next.js Starter — Mapper + DTO Pattern
 
-> **Stack**: Next.js 16 App Router · TypeScript · Zod v4 · Axios
+> **Stack**: Next.js 16 App Router · TypeScript · Zod v4 · Fetch API
 
 ---
 
@@ -15,7 +15,7 @@ UI DTO (validated form values)
     ↓  toCreatePayload()        ← transform (slug, null coercion...)
 Payload DTO (raw)
     ↓  createPayloadSchema.parse()
-Validated Payload              → gửi lên API (Axios)
+Validated Payload              → gửi lên API (fetcher)
                                ← nhận response
 Response Raw
     ↓  responseSchema.parse()   ← validate API response
@@ -31,7 +31,7 @@ UI Model                       → hiển thị lên component
 ```
 src/
 ├── lib/
-│   ├── axios.ts              # Axios instance + interceptors
+│   ├── fetcher.ts            # Fetch wrapper + auth/token handling
 │   ├── api-response.ts       # Generic ApiResponse<T> Zod schema
 │   └── create-mapper.ts      # 🔑 Generic mapper factory
 │
@@ -44,7 +44,7 @@ src/
 │
 ├── services/
 │   ├── index.ts              # Barrel: export tất cả services
-│   └── category.service.ts   # API calls dùng axiosInstance + categoryMapper
+│   └── category.service.ts   # API calls dùng fetcher + categoryMapper
 │
 └── types/
     └── category.types.ts     # TypeScript types (inferred từ Zod schemas)
@@ -147,7 +147,7 @@ export const productMapper = createMapper({
 // category.service.ts
 async create(uiData: CategoryUiDto): Promise<CategoryModel> {
   const payload = categoryMapper.create(uiData) // validate + transform
-  const { data } = await axiosInstance.post('/categories', payload)
+  const data = await fetcher.post('/categories', payload)
   return categoryMapper.fromResponse(data.data)  // parse response
 }
 ```

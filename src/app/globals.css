@@ -1,49 +1,43 @@
+/* Config */
+@import 'tailwindcss';
+
+/* My Styles */
+/* Important for (react-data-grid): required 'dark' or 'light', do not remove or use 'auto' */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light; /* or 'dark', or 'light dark' for auto */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.rdg {
+  /* Selection */
+  --rdg-selection-width: 2px;
+  --rdg-selection-color: hsl(207, 75%, 66%);
+
+  /* Typography */
+  --rdg-font-size: 14px;
+
+  /* Colors (using light-dark() for automatic theme switching) */
+  --rdg-color: light-dark(#000, #ddd);
+  --rdg-background-color: light-dark(hsl(0deg 0% 100%), hsl(0deg 0% 13%));
+
+  /* Header */
+  --rdg-header-background-color: light-dark(hsl(0deg 0% 97.5%), hsl(0deg 0% 10.5%));
+  --rdg-header-draggable-background-color: light-dark(hsl(0deg 0% 90.5%), hsl(0deg 0% 17.5%));
+
+  /* Rows */
+  --rdg-row-hover-background-color: light-dark(hsl(0deg 0% 96%), hsl(0deg 0% 9%));
+  --rdg-row-selected-background-color: light-dark(hsl(207deg 76% 92%), hsl(207deg 76% 42%));
+  --rdg-row-selected-hover-background-color: light-dark(hsl(207deg 76% 88%), hsl(207deg 76% 38%));
+
+  /* Borders */
+  --rdg-border-width: 1px;
+  --rdg-border-color: light-dark(#ddd, #444);
+  --rdg-summary-border-width: calc(var(--rdg-border-width) * 2);
+  --rdg-summary-border-color: light-dark(#aaa, #555);
+
+  /* Checkboxes */
+  --rdg-checkbox-focus-color: hsl(207deg 100% 69%);
 }
 
-html {
-  height: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+/* Custom Theme */
+.rdg-custom-theme {
 }
