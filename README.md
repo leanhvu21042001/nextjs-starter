@@ -2,6 +2,23 @@
 
 > **Stack**: Next.js 16 App Router · TypeScript · Zod v4 · Fetch API
 
+## Logging
+
+Logging is centralized with [src/lib/logger.ts](src/lib/logger.ts) and initialized by Next.js instrumentation files:
+
+- [src/instrumentation.ts](src/instrumentation.ts): server startup logging
+- [src/instrumentation-client.ts](src/instrumentation-client.ts): client startup, global error, unhandled rejection, and route transition logging
+
+Environment variables:
+
+- `LOG_LEVEL`: server log level (`debug` | `info` | `warn` | `error`)
+- `NEXT_PUBLIC_LOG_LEVEL`: client log level (`debug` | `info` | `warn` | `error`)
+
+Defaults:
+
+- `development` -> `debug`
+- `production` -> `info`
+
 ---
 
 ## Kiến trúc Mapper + DTO

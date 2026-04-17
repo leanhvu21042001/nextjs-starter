@@ -1,5 +1,6 @@
 'use client'
 import { deepPickStringValue, exportToCsv } from '@/lib/utils'
+import { logger } from '@/lib/logger'
 import { CSSProperties, useMemo, useRef, useState } from 'react'
 import {
   CalculatedColumn,
@@ -242,9 +243,10 @@ function AppDataGrid<TRow, TSummaryRow>({
     args: CellMouseArgs<NoInfer<TRow>, NoInfer<TSummaryRow>>,
     event: CellMouseEvent,
   ) => {
-    console.log({
-      args,
-      event,
+    logger.debug('DataGrid cell double-clicked', {
+      column: args.column.key,
+      rowIndex: args.rowIdx,
+      eventType: event.type,
     })
   }
 
@@ -267,8 +269,8 @@ function AppDataGrid<TRow, TSummaryRow>({
   }
 
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
-    console.log({
-      event,
+    logger.debug('DataGrid scrolled', {
+      eventType: event.type,
     })
   }
 
