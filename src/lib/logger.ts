@@ -1,6 +1,14 @@
 type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
 type LogMeta = Record<string, unknown>
+type LogPayload = {
+  level: LogLevel
+  message: string
+  timestamp: string
+  env: string
+  runtime: 'server' | 'client'
+  meta?: LogMeta
+}
 
 const LEVEL_ORDER: Record<LogLevel, number> = {
   debug: 10,
@@ -58,14 +66,18 @@ const normalizeMeta = (meta?: LogMeta | Error): LogMeta | undefined => {
 const write = (level: LogLevel, message: string, meta?: LogMeta | Error) => {
   if (!shouldLog(level)) return
 
-  const payload = {
+  const runtime: 'server' | 'client' = isServer ? 'server' : 'client'
+
+  const payload: LogPayload = {
     level,
     message,
     timestamp: new Date().toISOString(),
     env: process.env.NODE_ENV ?? 'development',
-    runtime: isServer ? 'server' : 'client',
+    runtime,
     ...(normalizeMeta(meta) ? { meta: normalizeMeta(meta) } : {}),
   }
+
+  void persistLogToFile(payload)
 
   switch (level) {
     case 'debug':
@@ -80,6 +92,66 @@ const write = (level: LogLevel, message: string, meta?: LogMeta | Error) => {
     case 'error':
       console.error(payload)
       return
+  }
+}
+
+const shouldPersistLogToFile = () => {
+  if (isServer) return false
+  if (process.env.NEXT_PUBLIC_LOG_TO_FILE === 'false') return false
+  return true
+}
+
+const safeStringify = (value: unknown) => {
+  const seen = new WeakSet<object>()
+
+  return JSON.stringify(value, (_key, val: unknown) => {
+    if (typeof val === 'bigint') {
+      return val.toString()
+    }
+
+    if (typeof val === 'object' && val !== null) {
+      if (seen.has(val as object)) {
+        return '[Circular]'
+      }
+      seen.add(val as object)
+    }
+
+    return val
+  })
+}
+
+const persistLogToFile = async (payload: LogPayload) => {
+  if (!shouldPersistLogToFile()) return
+
+  try {
+    const body = safeStringify(payload)
+
+    if (
+      !isServer &&
+      typeof navigator !== 'undefined' &&
+      typeof navigator.sendBeacon === 'function'
+    ) {
+      const blob = new Blob([body], { type: 'application/json' })
+      navigator.sendBeacon('/api/log', blob)
+      return
+    }
+
+    await fetch('/api/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      keepalive: true,
+      cache: 'no-store',
+    })
+  } catch (error) {
+    // Never let logging failures break application flow.
+    console.error({
+      level: 'error',
+      message: 'Failed to persist log file',
+      timestamp: new Date().toISOString(),
+      runtime: isServer ? 'server' : 'client',
+      meta: normalizeMeta(error as Error),
+    })
   }
 }
 
