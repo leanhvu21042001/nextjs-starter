@@ -1,53 +1,160 @@
-# Next.js Starter — Mapper + DTO Pattern
+# Next.js Starter
 
-> **Stack**: Next.js 16 App Router · TypeScript · Zod v4 · Fetch API
+Production-ready Next.js 16 starter with a typed DTO/Mapper pattern, reusable UI primitives, i18n routing, logging, and Docker deployment support.
 
-## Logging
+## Stack
 
-Logging is centralized with [src/lib/logger.ts](src/lib/logger.ts) and initialized by Next.js instrumentation files:
+- Next.js 16 (App Router)
+- React 19 + TypeScript
+- Zod v4 for schema validation
+- react-hook-form + zodResolver
+- Tailwind CSS 4
+- react-data-grid
 
-- [src/instrumentation.ts](src/instrumentation.ts): server startup logging
-- [src/instrumentation-client.ts](src/instrumentation-client.ts): client startup, global error, unhandled rejection, and route transition logging
+## Table of Contents
 
-Environment variables:
+- Quick Start
+- Available Scripts
+- Environment Variables
+- Project Structure
+- Logging
+- Security Defaults
+- Docker (Production)
+- UI Conventions
+- DTO + Mapper Architecture
+- Troubleshooting
 
-- `LOG_LEVEL`: server log level (`debug` | `info` | `warn` | `error`)
-- `NEXT_PUBLIC_LOG_LEVEL`: client log level (`debug` | `info` | `warn` | `error`)
+## Quick Start
+
+### Prerequisites
+
+- Node.js 20+ (Node 22 recommended)
+- npm 10+
+
+### Install
+
+```bash
+npm ci
+```
+
+### Run development server
+
+```bash
+npm run dev
+```
+
+App runs at `http://localhost:3000`.
+
+### Build for production
+
+```bash
+npm run build
+npm run start
+```
+
+## Available Scripts
+
+From [package.json](package.json):
+
+- `npm run dev`: Start Next.js dev server
+- `npm run build`: Production build
+- `npm run start`: Run production server
+- `npm run lint`: Run ESLint
+- `npm run format`: Format project with Prettier
+
+## Environment Variables
+
+Use [.env.example](.env.example) as baseline.
+
+Common variables used in this project:
+
+- `LOG_LEVEL`: server log level (`debug`, `info`, `warn`, `error`)
+- `NEXT_PUBLIC_LOG_LEVEL`: client log level (`debug`, `info`, `warn`, `error`)
+- `NEXT_PUBLIC_LOG_TO_FILE`: set `false` to disable client-to-file log persistence
+- `NEXT_PUBLIC_API_URL`: base URL for fetch client
+- `NEXT_PUBLIC_API_TIMEOUT`: fetch timeout in ms
 
 Defaults:
 
-- `development` -> `debug`
-- `production` -> `info`
+- `development` -> logger defaults to `debug`
+- `production` -> logger defaults to `info`
 
-### Log files
+## Project Structure
 
-This project can persist logs to `log/*.log` via `POST /api/log`.
+High-level structure:
 
-If you want to disable file persistence from the browser logger, set:
+```text
+src/
+  app/                  # App Router pages/layouts, including /api/log endpoint
+  components/           # Reusable UI and feature components
+  hooks/                # Reusable hooks
+  lib/                  # Shared utilities (fetcher, logger, mapper factory)
+  schemas/              # Zod schemas + mappers + DTO/model typing
+  services/             # App services (auth/category/...)
+```
 
-- `NEXT_PUBLIC_LOG_TO_FILE=false`
+Key files:
 
----
+- [src/lib/logger.ts](src/lib/logger.ts)
+- [src/lib/fetcher.ts](src/lib/fetcher.ts)
+- [src/lib/create-mapper.ts](src/lib/create-mapper.ts)
+- [src/proxy.ts](src/proxy.ts)
+- [next.config.ts](next.config.ts)
+
+## Logging
+
+Logging is centralized in [src/lib/logger.ts](src/lib/logger.ts) and initialized by:
+
+- [src/instrumentation.ts](src/instrumentation.ts) for server startup
+- [src/instrumentation-client.ts](src/instrumentation-client.ts) for client startup/errors
+
+### File logs
+
+Client logs can be persisted into `log/*.log` through API route [src/app/api/log/route.ts](src/app/api/log/route.ts).
+
+Generated files:
+
+- `log/app-YYYY-MM-DD.log`
+- `log/error-YYYY-MM-DD.log`
+
+Disable file persistence with:
+
+```env
+NEXT_PUBLIC_LOG_TO_FILE=false
+```
+
+## Security Defaults
+
+Security headers are set in [next.config.ts](next.config.ts), including:
+
+- `X-Frame-Options: DENY`
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy`
+- `Permissions-Policy`
+- `Cross-Origin-Opener-Policy`
+- `Cross-Origin-Resource-Policy`
+- baseline `Content-Security-Policy`
+- `Strict-Transport-Security` in production
+
+Locale/auth cookie writes also use safer attributes (sameSite/secure where applicable).
 
 ## Docker (Production)
 
-This project includes a multi-stage production setup in the `docker/` folder.
+All Docker assets are under [docker](docker).
 
-### 1. Build image
+### Build image
 
 ```bash
 docker build -f docker/Dockerfile -t nextjs-starter:prod .
 ```
 
-### 2. Run container
+### Run container
 
 ```bash
 docker run --name nextjs-starter -p 3000:3000 --env-file .env.local -v ${PWD}/log:/app/log nextjs-starter:prod
 ```
 
-Open: `http://localhost:3000`
-
-### 3. Run with Docker Compose
+### Run with Compose
 
 ```bash
 docker compose -f docker/docker-compose.yml up -d --build
@@ -61,266 +168,72 @@ docker compose -f docker/docker-compose.yml down
 
 Notes:
 
-- Production image uses Next.js standalone output (`output: 'standalone'`).
-- Container runs as a non-root user.
-- `./log` is mounted to `/app/log` so logs persist outside the container.
+- Production image uses standalone output (`output: 'standalone'`)
+- Runtime image runs as non-root
+- `./log` is mounted to `/app/log` for persistent logs
 
----
+## UI Conventions
 
-## UI Library Conventions
+UI exports are centralized in [src/components/ui/index.ts](src/components/ui/index.ts).
 
-UI components are exported from `src/components/ui/index.ts`.
+Use semantic wrappers from UI package rather than raw tags in app pages:
 
-### Semantic wrappers
+- `Main`, `Section`, `Article`, `Aside`, `Header`, `Nav`, `Footer`
 
-To keep JSX semantic and consistent across the app, use dedicated semantic components from `@/components/ui`:
+Content wrappers:
 
-- `Section` -> `<section>`
-- `Article` -> `<article>`
-- `Aside` -> `<aside>`
-- `Header` -> `<header>`
-- `Nav` -> `<nav>`
-- `Main` -> `<main>`
-- `Footer` -> `<footer>`
+- `Box` for block layout containers
+- `Inline` for inline content
+- `Heading`, `Paragraph` for typography
 
-### Content wrappers
+Form wrappers:
 
-- `Box`: block container (maps to `<div>`) for layout/composition
-- `Inline`: inline container (maps to `<span>`) for inline text fragments/badges/messages
-- `Heading`: heading wrapper (`h1..h6`) via `level`
-- `Paragraph`: paragraph wrapper (`<p>`)
+- `Form`, `FormProvider`, `FormField`, `FormItem`, `FormControl`, `FormLabel`, `FormDescription`, `FormMessage`
 
-> Note: `Box` does not support polymorphic props like `as`/`type`. Use semantic components or `Inline` instead.
+## DTO + Mapper Architecture
 
-### Form components
+The app follows a strict flow:
 
-- `Form`: maps to native `<form>` element
-- `FormProvider`: react-hook-form provider export
-- `FormField`, `FormItem`, `FormControl`, `FormLabel`, `FormDescription`, `FormMessage`
-
-Example:
-
-```tsx
-import { Form, FormProvider } from '@/components/ui';
-<FormProvider {...formMethods}>
-  <Form onSubmit={formMethods.handleSubmit(onSubmit)}>{/* form fields */}</Form>
-</FormProvider>
+```text
+UI Input -> UI Schema Parse -> Payload Mapper -> API Call -> Response Schema Parse -> UI Model
 ```
 
----
+### Why this pattern
 
-## UI `Image` Component (SEO + Performance)
+- Single source of truth for validation
+- Clear separation between UI DTO, API payload DTO, and UI model
+- Strong typing with minimal duplication
 
-`Image` is a wrapper around `next/image` with practical defaults for SEO and styling.
+### Typical layers
 
-Source: `src/components/ui/image.tsx`
+1. UI schema (form-level validation)
+2. Create/update/delete payload schemas
+3. Response schema
+4. Mapper transformations (`create`, `update`, `delete`, `fromResponse`, `fromList`)
 
-### Features
-
-- Requires `alt` for accessibility/SEO.
-- Uses `loading="lazy"` by default (unless `priority` is enabled).
-- Uses default `sizes="100vw"` for responsive behavior.
-- Optional `caption` rendered via semantic `<figure>/<figcaption>`.
-- Optional style flags:
-  - `rounded` (default: `true`)
-  - `shadow` (default: `false`)
-- Supports `containerClassName` for figure wrapper and `className` for image styling.
-
-### Example
-
-```tsx
-import { Image } from '@/components/ui';
-<Image
-  src="/images/hero.jpg"
-  alt="Dashboard analytics overview"
-  width={1200}
-  height={675}
-  sizes="(max-width: 768px) 100vw, 1200px"
-  priority
-  caption="Analytics dashboard preview"
-  shadow
-/>
-```
-
----
-
-## Kiến trúc Mapper + DTO
-
-Mục tiêu: chuẩn hóa và type-safe toàn bộ luồng dữ liệu:
-
-```
-UI Form Input
-    ↓  uiSchema.parse()         ← validate, throw nếu lỗi
-UI DTO (validated form values)
-    ↓  toCreatePayload()        ← transform (slug, null coercion...)
-Payload DTO (raw)
-    ↓  createPayloadSchema.parse()
-Validated Payload              → gửi lên API (fetcher)
-                               ← nhận response
-Response Raw
-    ↓  responseSchema.parse()   ← validate API response
-Response DTO (validated)
-    ↓  fromResponse()           ← transform (string → Date, rename...)
-UI Model                       → hiển thị lên component
-```
-
----
-
-## Cấu trúc thư mục
-
-```
-src/
-├── lib/
-│   ├── fetcher.ts            # Fetch wrapper + auth/token handling
-│   ├── api-response.ts       # Generic ApiResponse<T> Zod schema
-│   └── create-mapper.ts      # 🔑 Generic mapper factory
-│
-├── schemas/
-│   ├── index.ts              # Barrel: export tất cả mappers
-│   └── category/
-│       ├── index.ts          # Barrel: export category schemas + mapper
-│       ├── category.schema.ts  # 3 lớp schema (UI / Payload / Response)
-│       └── category.mapper.ts  # categoryMapper dùng createMapper()
-│
-├── services/
-│   ├── index.ts              # Barrel: export tất cả services
-│   └── category.service.ts   # API calls dùng fetcher + categoryMapper
-│
-└── types/
-    └── category.types.ts     # TypeScript types (inferred từ Zod schemas)
-```
-
----
-
-## Schema: 3 lớp
+Example usage in services:
 
 ```ts
-// category.schema.ts
-
-// Lớp 1: UI Form
-export const categoryUiSchema = z.object({
-  name: z.string({ error: 'Bắt buộc' }).min(2).max(100).trim(),
-  slug: z.string().max(120).optional().or(z.literal('')),
-  description: z.string().max(500).optional().or(z.literal('')),
-  status: z.enum(['active', 'inactive']),
-})
-
-// Lớp 2: API Payload
-export const categoryCreatePayloadSchema = z.object({ name, slug, description, status })
-export const categoryUpdatePayloadSchema = categoryCreatePayloadSchema.extend({ id })
-export const categoryDeletePayloadSchema = z.object({ id })
-
-// Lớp 3: API Response
-export const categoryResponseSchema = z.object({
-  id,
-  name,
-  slug,
-  description,
-  status,
-  createdAt,
-  updatedAt,
-})
+const payload = categoryMapper.create(uiData)
+const data = await fetcher.post('/categories', payload)
+return categoryMapper.fromResponse(data.data)
 ```
 
----
+## Troubleshooting
 
-## Mapper: dùng `createMapper` factory
+### Build passes locally but Docker fails
 
-```ts
-// category.mapper.ts
-export const categoryMapper = createMapper({
-  uiSchema: categoryUiSchema,
-  createPayloadSchema: categoryCreatePayloadSchema,
-  updatePayloadSchema: categoryUpdatePayloadSchema,
-  deletePayloadSchema: categoryDeletePayloadSchema,
-  responseSchema: categoryResponseSchema,
+- Ensure you build from repo root:
+  `docker build -f docker/Dockerfile -t nextjs-starter:prod .`
+- Confirm `.env.local` contains required runtime variables.
 
-  toCreatePayload: (validated) => ({
-    ...validated,
-    slug: validated.slug || generateSlug(validated.name),
-  }),
-  toUpdatePayload: (validated, id) => ({ id, ...validated }),
-  fromResponse: (validated): CategoryModel => ({
-    ...validated,
-    createdAt: new Date(validated.createdAt),
-  }),
-})
-```
+### Logs not written to `log/*.log`
 
-`categoryMapper` tự động có các method:
+- Ensure app can call `POST /api/log`
+- Ensure `NEXT_PUBLIC_LOG_TO_FILE` is not `false`
+- Ensure `log` directory is writable in your environment/container
 
-| Method                              | Input                      | Output                               |
-| ----------------------------------- | -------------------------- | ------------------------------------ |
-| `categoryMapper.create(uiData)`     | `CategoryUiDto`            | `CategoryCreatePayloadDto`           |
-| `categoryMapper.update(uiData, id)` | `CategoryUiDto` + `string` | `CategoryUpdatePayloadDto`           |
-| `categoryMapper.delete(id)`         | `string`                   | `CategoryDeletePayloadDto`           |
-| `categoryMapper.fromResponse(raw)`  | `unknown`                  | `CategoryModel`                      |
-| `categoryMapper.fromList(rawList)`  | `unknown[]`                | `CategoryModel[]`                    |
-| `categoryMapper.schemas.ui`         | —                          | `categoryUiSchema` (cho zodResolver) |
+### Locale routing not as expected
 
----
-
-## Tạo mapper mới cho feature khác
-
-```ts
-// src/schemas/product/product.mapper.ts
-import { createMapper } from '@/lib/create-mapper'
-
-export const productMapper = createMapper({
-  uiSchema: productUiSchema,
-  createPayloadSchema: productCreatePayloadSchema,
-  updatePayloadSchema: productUpdatePayloadSchema,
-  deletePayloadSchema: productDeletePayloadSchema,
-  responseSchema: productResponseSchema,
-
-  toCreatePayload: (v) => ({ ... }),
-  toUpdatePayload: (v, id) => ({ id, ... }),
-  fromResponse: (v): ProductModel => ({ ... }),
-})
-```
-
----
-
-## Sử dụng trong Service
-
-```ts
-// category.service.ts
-async create(uiData: CategoryUiDto): Promise<CategoryModel> {
-  const payload = categoryMapper.create(uiData) // validate + transform
-  const data = await fetcher.post('/categories', payload)
-  return categoryMapper.fromResponse(data.data)  // parse response
-}
-```
-
----
-
-## Sử dụng với react-hook-form + zodResolver
-
-```tsx
-import { categoryMapper } from '@/schemas'
-import { zodResolver } from '@hookform/resolvers/zod'
-
-const form = useForm<CategoryUiDto>({
-  resolver: zodResolver(categoryMapper.schemas.ui),
-})
-
-const onSubmit = async (values: CategoryUiDto) => {
-  await categoryService.create(values)
-}
-```
-
----
-
-## Types (zero duplication — inferred từ Zod)
-
-```ts
-// category.types.ts
-export type CategoryUiDto            = z.infer<typeof categoryUiSchema>
-export type CategoryCreatePayloadDto = z.infer<typeof categoryCreatePayloadSchema>
-export type CategoryUpdatePayloadDto = z.infer<typeof categoryUpdatePayloadSchema>
-export type CategoryDeletePayloadDto = z.infer<typeof categoryDeletePayloadSchema>
-export type CategoryResponseDto      = z.infer<typeof categoryResponseSchema>
-
-// Model là type tay — sau khi transform (Date, rename, etc.)
-export type CategoryModel = { id: string; name: string; createdAt: Date; ... }
-```
+- Check locale rewrite/header logic in [src/proxy.ts](src/proxy.ts)
+- Verify locale cookie and `?lang=` query behavior
