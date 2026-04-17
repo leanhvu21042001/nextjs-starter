@@ -1,4 +1,4 @@
-import { Box, Heading, Paragraph, Section } from '@/components/ui'
+import { Box, Heading, Main, Paragraph, Section } from '@/components/ui'
 import { TasksGrid } from './components/tasks-grid'
 
 /**
@@ -6,7 +6,7 @@ import { TasksGrid } from './components/tasks-grid'
  */
 export default function DashboardPage() {
   return (
-    <main className="space-y-6 p-6">
+    <Main className="space-y-6 p-6">
       <Section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <Heading level={1} className="text-xl font-semibold text-slate-900">
           Data Grid CRUD Full Example
@@ -19,9 +19,9 @@ export default function DashboardPage() {
         </Paragraph>
       </Section>
 
-      <Section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <Section className="rounded-none border-0 bg-transparent p-0 shadow-none">
         <TasksGrid />
       </Section>
-    </main>
+    </Main>
   )
 }

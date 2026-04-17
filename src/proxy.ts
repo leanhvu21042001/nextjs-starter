@@ -32,6 +32,18 @@ const resolvePreferredLocale = (request: NextRequest) =>
   getLocaleFromAcceptLanguage(request) ??
   DEFAULT_LOCALE
 
+const getLocaleCookieOptions = (request: NextRequest) => {
+  const isHttps =
+    request.nextUrl.protocol === 'https:' || request.headers.get('x-forwarded-proto') === 'https'
+
+  return {
+    path: '/',
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: 'lax' as const,
+    secure: isHttps,
+  }
+}
+
 const withLocaleHeader = (request: NextRequest, locale: string) => {
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-locale', locale)
@@ -49,15 +61,13 @@ export function proxy(request: NextRequest) {
       },
     })
 
-    response.cookies.set(LOCALE_COOKIE_NAME, localeInPath, {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 365,
-    })
+    response.cookies.set(LOCALE_COOKIE_NAME, localeInPath, getLocaleCookieOptions(request))
     return response
   }
 
   const locale = resolvePreferredLocale(request)
   const rewriteUrl = request.nextUrl.clone()
+  rewriteUrl.searchParams.delete('lang')
   rewriteUrl.pathname =
     locale === DEFAULT_LOCALE ? `/${DEFAULT_LOCALE}${pathname}` : `/${locale}${pathname}`
 
@@ -67,7 +77,7 @@ export function proxy(request: NextRequest) {
     },
   })
 
-  response.cookies.set(LOCALE_COOKIE_NAME, locale, { path: '/', maxAge: 60 * 60 * 24 * 365 })
+  response.cookies.set(LOCALE_COOKIE_NAME, locale, getLocaleCookieOptions(request))
 
   return response
 }

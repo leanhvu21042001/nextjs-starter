@@ -5,7 +5,52 @@
 /* Important for (react-data-grid): required 'dark' or 'light', do not remove or use 'auto' */
 :root {
   color-scheme: light; /* or 'dark', or 'light dark' for auto */
+  --background-primary: #f8faf7;
+  --background-secondary: #eef5ec;
+  --surface: rgba(255, 255, 255, 0.9);
+  --surface-strong: #ffffff;
+  --text-primary: #0f1d32;
+  --text-secondary: #3f526e;
+  --brand: #0f9f4c;
+  --brand-deep: #0b7f3c;
+  --brand-accent: #f2b63d;
+  --line-soft: rgba(15, 29, 50, 0.12);
 }
+
+body {
+  font-family: var(--font-manrope), sans-serif;
+  background:
+    radial-gradient(circle at 8% 6%, rgba(15, 159, 76, 0.16), transparent 34%),
+    radial-gradient(circle at 92% 12%, rgba(242, 182, 61, 0.2), transparent 38%),
+    linear-gradient(180deg, var(--background-secondary) 0%, var(--background-primary) 50%);
+  color: var(--text-primary);
+}
+
+.font-display {
+  font-family: var(--font-fraunces), serif;
+}
+
+.animate-fade-up {
+  animation: fade-up 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-up-delay {
+  animation: fade-up 760ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Theme For Data Grid */
 
 .rdg {
   /* Selection */
@@ -38,6 +83,5 @@
   --rdg-checkbox-focus-color: hsl(207deg 100% 69%);
 }
 
-/* Custom Theme */
 .rdg-custom-theme {
 }

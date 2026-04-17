@@ -2,7 +2,18 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { getContactPageContent } from './page.content'
-import { Box, Button, Form, Heading, Input, Label, Paragraph } from '@/components/ui'
+import {
+  Box,
+  Button,
+  Form,
+  Heading,
+  Input,
+  Label,
+  Main,
+  Paragraph,
+  Section,
+  Textarea,
+} from '@/components/ui'
 import { hasLocale } from '@/lib/i18n/config'
 import { createLocalizedMetadata } from '@/lib/seo'
 
@@ -31,38 +42,40 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
   const content = getContactPageContent(locale)
 
   return (
-    <main className="py-24 px-6 lg:px-8 max-w-2xl mx-auto">
-      <Heading level={2} className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
-        {content.heading}
-      </Heading>
-      <Paragraph className="text-slate-600 mb-8">{content.subheading}</Paragraph>
+    <Main className="py-24">
+      <Section className="max-w-2xl mx-auto px-6 lg:px-8">
+        <Heading level={2} className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
+          {content.heading}
+        </Heading>
+        <Paragraph className="text-slate-600 mb-8">{content.subheading}</Paragraph>
 
-      <Form className="flex flex-col gap-6" action="#">
-        <Box className="grid grid-cols-2 gap-4">
-          <Box className="flex flex-col gap-2">
-            <Label htmlFor="first-name">{content.form.firstName}</Label>
-            <Input id="first-name" placeholder={content.form.firstNamePlaceholder} />
+        <Form className="flex flex-col gap-6" action="#">
+          <Box className="grid grid-cols-2 gap-4">
+            <Box className="flex flex-col gap-2">
+              <Label htmlFor="first-name">{content.form.firstName}</Label>
+              <Input id="first-name" placeholder={content.form.firstNamePlaceholder} />
+            </Box>
+            <Box className="flex flex-col gap-2">
+              <Label htmlFor="last-name">{content.form.lastName}</Label>
+              <Input id="last-name" placeholder={content.form.lastNamePlaceholder} />
+            </Box>
           </Box>
           <Box className="flex flex-col gap-2">
-            <Label htmlFor="last-name">{content.form.lastName}</Label>
-            <Input id="last-name" placeholder={content.form.lastNamePlaceholder} />
+            <Label htmlFor="email">{content.form.email}</Label>
+            <Input id="email" type="email" placeholder="example@gmail.com" />
           </Box>
-        </Box>
-        <Box className="flex flex-col gap-2">
-          <Label htmlFor="email">{content.form.email}</Label>
-          <Input id="email" type="email" placeholder="example@gmail.com" />
-        </Box>
-        <Box className="flex flex-col gap-2">
-          <Label htmlFor="message">{content.form.message}</Label>
-          <textarea
-            id="message"
-            rows={4}
-            className="flex w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder={content.form.messagePlaceholder}
-          />
-        </Box>
-        <Button type="button">{content.form.submit}</Button>
-      </Form>
-    </main>
+          <Box className="flex flex-col gap-2">
+            <Label htmlFor="message">{content.form.message}</Label>
+            <Textarea
+              id="message"
+              rows={4}
+              className="border-slate-300 focus-visible:ring-green-500"
+              placeholder={content.form.messagePlaceholder}
+            />
+          </Box>
+          <Button type="button">{content.form.submit}</Button>
+        </Form>
+      </Section>
+    </Main>
   )
 }

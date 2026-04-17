@@ -13,6 +13,22 @@ type RequestOptions = {
 const DEFAULT_TIMEOUT = Number(process.env.NEXT_PUBLIC_API_TIMEOUT) || 10_000
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || ''
 
+function resolveBaseUrl() {
+  if (!BASE_URL) {
+    return typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
+  }
+
+  try {
+    const url = new URL(BASE_URL)
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      throw new Error('Invalid API URL protocol')
+    }
+    return url.origin
+  } catch {
+    throw new Error('NEXT_PUBLIC_API_URL must be an absolute http(s) URL')
+  }
+}
+
 export class FetchError extends Error {
   constructor(
     message: string,
@@ -25,7 +41,7 @@ export class FetchError extends Error {
 }
 
 function buildUrl(path: string, params?: QueryParams) {
-  const base = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL
+  const base = resolveBaseUrl()
   const normalizedPath = path.startsWith('/') ? path : `/${path}`
   const url = new URL(`${base}${normalizedPath}`)
 
@@ -86,6 +102,8 @@ async function request<T>(method: string, path: string, options: RequestOptions 
     const response = await fetch(buildUrl(path, options.params), {
       method,
       headers,
+      credentials: 'same-origin',
+      cache: method === 'GET' ? 'default' : 'no-store',
       body:
         options.body === undefined || options.body === null
           ? undefined

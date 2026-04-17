@@ -946,7 +946,7 @@ function AppDataGrid<TRow, TSummaryRow>({
 
   return (
     <>
-      <Box className="mb-2 flex flex-col gap-2">
+      <Box className="mb-2 flex flex-col gap-2 rounded-none border-0 bg-transparent p-0 shadow-none">
         <GridToolbar
           selectedCount={selectedRows.size}
           disabledActions={toolbarConfig?.disabledActions}
@@ -976,7 +976,7 @@ function AppDataGrid<TRow, TSummaryRow>({
           writeError={writeError}
         />
 
-        <Box className="flex flex-wrap items-center gap-2">
+        <Box className="flex flex-wrap items-center gap-2 rounded-none border-0 bg-transparent p-0 shadow-none">
           {isSearch ? (
             <Input
               onChange={(event) => {
@@ -1055,9 +1055,12 @@ function AppDataGrid<TRow, TSummaryRow>({
             </DialogDescription>
           </DialogHeader>
 
-          <Box className="grid max-h-[60vh] grid-cols-1 gap-3 overflow-auto">
+          <Box className="grid max-h-[60vh] grid-cols-1 gap-3 overflow-auto rounded-none border-0 bg-transparent p-0 shadow-none">
             {formFields.map((field) => (
-              <Box key={field.key} className="flex flex-col gap-1">
+              <Box
+                key={field.key}
+                className="flex flex-col gap-1 rounded-none border-0 bg-transparent p-0 shadow-none"
+              >
                 <Label>{field.label}</Label>
                 {renderFormField(field)}
                 {formErrors[field.key] && (

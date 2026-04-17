@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 
-import { Box, Heading, Paragraph } from '@/components/ui'
+import { Box, Heading, Main, Paragraph } from '@/components/ui'
 import { getSettingsPageContent } from './page.content'
 import { hasLocale } from '@/lib/i18n/config'
 
@@ -11,7 +11,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
   const content = getSettingsPageContent(locale)
 
   return (
-    <main className="p-8 text-slate-900">
+    <Main className="p-8 text-slate-900">
       <Box className="max-w-7xl mx-auto">
         <Heading level={1} className="text-3xl font-bold mb-2">
           {content.heading}
@@ -35,6 +35,6 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
           </Box>
         </Box>
       </Box>
-    </main>
+    </Main>
   )
 }

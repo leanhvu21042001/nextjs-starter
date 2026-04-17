@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Fraunces, Manrope } from 'next/font/google'
 import { headers } from 'next/headers'
 
 import { DEFAULT_LOCALE, getTextDirection, normalizeLocale } from '@/lib/i18n/config'
@@ -7,7 +7,17 @@ import { getSiteUrl } from '@/lib/seo'
 
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const manrope = Manrope({
+  subsets: ['latin'],
+  variable: '--font-manrope',
+  weight: ['400', '500', '600', '700', '800'],
+})
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-fraunces',
+  weight: ['600', '700'],
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
@@ -39,7 +49,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale} dir={getTextDirection()}>
-      <body className={inter.className}>{children}</body>
+      <body className={`${manrope.variable} ${fraunces.variable} font-sans`}>{children}</body>
     </html>
   )
 }

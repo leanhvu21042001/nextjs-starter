@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { getAboutPageContent } from './page.content'
-import { Box, Heading, Link, Paragraph } from '@/components/ui'
+import { Box, Heading, Link, Main, Paragraph, Section } from '@/components/ui'
 import { hasLocale } from '@/lib/i18n/config'
 import { createLocalizedMetadata } from '@/lib/seo'
 
@@ -31,8 +31,8 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
   const content = getAboutPageContent(locale)
 
   return (
-    <main className="py-24 sm:py-32">
-      <Box className="mx-auto max-w-7xl px-6 lg:px-8">
+    <Main className="py-24 sm:py-32">
+      <Section className="mx-auto max-w-7xl px-6 lg:px-8">
         <Box className="mx-auto max-w-2xl lg:text-center">
           <Heading level={2} className="text-base font-semibold leading-7 text-green-600">
             {content.eyebrow}
@@ -48,7 +48,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
             </Link>
           </Box>
         </Box>
-      </Box>
-    </main>
+      </Section>
+    </Main>
   )
 }

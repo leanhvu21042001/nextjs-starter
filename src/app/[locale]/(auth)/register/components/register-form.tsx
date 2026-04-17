@@ -39,8 +39,8 @@ export function RegisterForm({ content }: { content: RegisterPageContent }) {
   }
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-      <Box className="flex flex-col gap-2">
+    <Form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
+      <Box className="rounded-none border-0 bg-transparent p-0 shadow-none flex flex-col gap-2">
         <Label htmlFor="name" className={errors.name ? 'text-red-500' : ''}>
           {content.form.name}
         </Label>
@@ -54,7 +54,7 @@ export function RegisterForm({ content }: { content: RegisterPageContent }) {
         {errors.name && <Inline className="text-xs text-red-500">{errors.name.message}</Inline>}
       </Box>
 
-      <Box className="flex flex-col gap-2">
+      <Box className="rounded-none border-0 bg-transparent p-0 shadow-none flex flex-col gap-2">
         <Label htmlFor="email" className={errors.email ? 'text-red-500' : ''}>
           {content.form.email}
         </Label>
@@ -68,7 +68,7 @@ export function RegisterForm({ content }: { content: RegisterPageContent }) {
         {errors.email && <Inline className="text-xs text-red-500">{errors.email.message}</Inline>}
       </Box>
 
-      <Box className="flex flex-col gap-2">
+      <Box className="rounded-none border-0 bg-transparent p-0 shadow-none flex flex-col gap-2">
         <Label htmlFor="password" className={errors.password ? 'text-red-500' : ''}>
           {content.form.password}
         </Label>
@@ -84,7 +84,7 @@ export function RegisterForm({ content }: { content: RegisterPageContent }) {
         )}
       </Box>
 
-      <Box className="flex flex-col gap-2">
+      <Box className="rounded-none border-0 bg-transparent p-0 shadow-none flex flex-col gap-2">
         <Label htmlFor="confirmPassword" className={errors.confirmPassword ? 'text-red-500' : ''}>
           {content.form.confirmPassword}
         </Label>
@@ -100,7 +100,11 @@ export function RegisterForm({ content }: { content: RegisterPageContent }) {
         )}
       </Box>
 
-      <Button type="submit" disabled={loading} className="w-full mt-2">
+      <Button
+        type="submit"
+        disabled={loading}
+        className="w-full mt-1 h-11 rounded-xl font-semibold"
+      >
         {loading ? content.form.submitting : content.form.submit}
       </Button>
     </Form>

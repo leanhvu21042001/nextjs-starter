@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'react-hot-toast'
-import { Box, Button, Form, Inline, Input, Label } from '@/components/ui'
+import { Box, Button, Form, Inline, Input, Label, Link } from '@/components/ui'
 import { authService } from '@/services/auth.service'
 import { loginUiSchema } from '@/schemas/auth/auth.schema'
 import type { LoginUiDto } from '@/schemas/auth/auth.types'
@@ -39,8 +39,8 @@ export function LoginForm({ content }: { content: LoginPageContent }) {
   }
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-      <Box className="flex flex-col gap-2">
+    <Form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
+      <Box className="rounded-none border-0 bg-transparent p-0 shadow-none flex flex-col gap-2">
         <Label htmlFor="email" className={errors.email ? 'text-red-500' : ''}>
           {content.form.email}
         </Label>
@@ -54,17 +54,17 @@ export function LoginForm({ content }: { content: LoginPageContent }) {
         {errors.email && <Inline className="text-xs text-red-500">{errors.email.message}</Inline>}
       </Box>
 
-      <Box className="flex flex-col gap-2">
-        <Box className="flex items-center justify-between">
+      <Box className="rounded-none border-0 bg-transparent p-0 shadow-none flex flex-col gap-2">
+        <Box className="rounded-none border-0 bg-transparent p-0 shadow-none flex items-center justify-between">
           <Label htmlFor="password" className={errors.password ? 'text-red-500' : ''}>
             {content.form.password}
           </Label>
-          <a
-            href="#"
-            className="text-sm font-medium text-green-600 hover:text-green-500 transition"
+          <Link
+            href="/contact"
+            className="text-sm font-medium text-green-600 transition hover:text-green-500"
           >
             {content.form.forgotPassword}
-          </a>
+          </Link>
         </Box>
         <Input
           id="password"
@@ -78,7 +78,11 @@ export function LoginForm({ content }: { content: LoginPageContent }) {
         )}
       </Box>
 
-      <Button type="submit" disabled={loading} className="w-full mt-2">
+      <Button
+        type="submit"
+        disabled={loading}
+        className="w-full mt-1 h-11 rounded-xl font-semibold"
+      >
         {loading ? content.form.submitting : content.form.submit}
       </Button>
     </Form>

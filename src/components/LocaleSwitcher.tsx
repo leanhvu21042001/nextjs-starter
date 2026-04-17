@@ -21,11 +21,17 @@ export const LocaleSwitcher: FC = () => {
 
   const pathLocale = getPathLocale(pathname)
   const locale = pathLocale ?? DEFAULT_LOCALE
+  const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:'
 
   const handleLocaleChange = (nextLocale: string) => {
     if (!hasLocale(nextLocale)) return
 
-    Cookies.set(LOCALE_COOKIE_NAME, nextLocale, { expires: 365 })
+    Cookies.set(LOCALE_COOKIE_NAME, nextLocale, {
+      expires: 365,
+      sameSite: 'lax',
+      secure: isHttps,
+      path: '/',
+    })
 
     const pathWithoutLocale = stripLocaleFromPathname(pathname)
     const query = searchParams.toString()

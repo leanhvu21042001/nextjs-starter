@@ -16,7 +16,12 @@ export const authService = {
     // -- Fake response --
     await new Promise((resolve) => setTimeout(resolve, 800)) // delay
     if (payload.email !== 'admin@example.com' || payload.password !== '123456') {
-      throw new Error('Email hoặc mật khẩu không đúng. Vô Admin: admin@example.com / 123456')
+      const message =
+        process.env.NODE_ENV === 'production'
+          ? 'Email hoặc mật khẩu không đúng.'
+          : 'Email hoặc mật khẩu không đúng. Vô Admin: admin@example.com / 123456'
+
+      throw new Error(message)
     }
     const fakeApiResponse = {
       accessToken: 'fake-jwt-token-12345',
@@ -31,7 +36,13 @@ export const authService = {
     const authModel = authMapper.fromResponse(fakeApiResponse)
 
     // Lưu token vào cookie và localStorage
-    Cookies.set('token', authModel.accessToken, { expires: 7 })
+    const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:'
+    Cookies.set('token', authModel.accessToken, {
+      expires: 7,
+      sameSite: 'lax',
+      secure: isHttps,
+      path: '/',
+    })
     localStorage.setItem('access_token', authModel.accessToken)
 
     return authModel
@@ -60,14 +71,20 @@ export const authService = {
 
     const authModel = registerMapper.fromResponse(fakeApiResponse)
 
-    Cookies.set('token', authModel.accessToken, { expires: 7 })
+    const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:'
+    Cookies.set('token', authModel.accessToken, {
+      expires: 7,
+      sameSite: 'lax',
+      secure: isHttps,
+      path: '/',
+    })
     localStorage.setItem('access_token', authModel.accessToken)
 
     return authModel
   },
 
   logout() {
-    Cookies.remove('token')
+    Cookies.remove('token', { path: '/' })
     localStorage.removeItem('access_token')
     window.location.href = '/login'
   },

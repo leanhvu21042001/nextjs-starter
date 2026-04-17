@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 
 import { getMetadataContent } from './metadata.content'
 import { getPublicLayoutContent } from './layout.content'
-import { Box, Link } from '@/components/ui'
+import { Box, Footer, Header, Link, Main, Nav } from '@/components/ui'
 import { hasLocale } from '@/lib/i18n/config'
 import { createLocalizedMetadata } from '@/lib/seo'
 import { LocaleSwitcher } from '@/components/LocaleSwitcher'
@@ -39,56 +39,86 @@ export default async function PublicLayout({
   const content = getPublicLayoutContent(locale)
 
   return (
-    <Box className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="bg-white shadow-sm sticky top-0 z-10 w-full">
-        <Box className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Box className="flex items-center gap-8">
-            <Link href="/" className="font-bold text-xl text-green-700 tracking-tight">
-              AppLogo
-            </Link>
-            <nav className="hidden md:flex gap-6">
-              <Link href="/" className="text-sm font-medium text-slate-600 hover:text-slate-900">
-                {content.nav.home}
+    <Box className="min-h-screen rounded-none border-0 bg-transparent p-0 shadow-none flex flex-col">
+      <Header className="w-full border-b border-[var(--line-soft)] bg-[var(--surface-strong)] px-4 py-3 sm:px-6 lg:px-8">
+        <Box className="mx-auto w-full max-w-6xl rounded-none border-0 bg-transparent p-0 shadow-none">
+          <Box className="rounded-none border-0 bg-transparent p-0 shadow-none flex items-center justify-between gap-3">
+            <Box className="rounded-none border-0 bg-transparent p-0 shadow-none flex items-center gap-3 sm:gap-8">
+              <Link
+                href="/"
+                className="font-display text-xl font-bold tracking-tight text-[var(--text-primary)]"
+              >
+                AppLogo
+              </Link>
+              <Nav className="hidden items-center rounded-full border border-[var(--line-soft)] bg-white/80 px-2 py-1 md:flex">
+                <Link
+                  href="/"
+                  className="rounded-full px-3 py-1.5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--background-secondary)] hover:text-[var(--text-primary)]"
+                >
+                  {content.nav.home}
+                </Link>
+                <Link
+                  href="/about"
+                  className="rounded-full px-3 py-1.5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--background-secondary)] hover:text-[var(--text-primary)]"
+                >
+                  {content.nav.about}
+                </Link>
+                <Link
+                  href="/contact"
+                  className="rounded-full px-3 py-1.5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--background-secondary)] hover:text-[var(--text-primary)]"
+                >
+                  {content.nav.contact}
+                </Link>
+              </Nav>
+            </Box>
+
+            <Box className="rounded-none border-0 bg-transparent p-0 shadow-none flex items-center gap-2 sm:gap-3">
+              <LocaleSwitcher />
+              <Link
+                href="/login"
+                className="hidden rounded-full px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-white sm:inline-flex"
+              >
+                {content.login}
               </Link>
               <Link
-                href="/about"
-                className="text-sm font-medium text-slate-600 hover:text-slate-900"
+                href="/register"
+                className="inline-flex rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-bold text-white shadow-[0_8px_22px_rgba(15,159,76,0.35)] transition hover:-translate-y-0.5 hover:bg-[var(--brand-deep)]"
               >
-                {content.nav.about}
+                {content.register}
               </Link>
-              <Link
-                href="/contact"
-                className="text-sm font-medium text-slate-600 hover:text-slate-900"
-              >
-                {content.nav.contact}
-              </Link>
-            </nav>
+            </Box>
           </Box>
-          <Box className="flex items-center gap-4">
-            <LocaleSwitcher />
+
+          <Nav className="mt-3 flex items-center justify-center rounded-full border border-[var(--line-soft)] bg-white/80 px-2 py-1 md:hidden">
             <Link
-              href="/login"
-              className="text-sm font-medium px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition"
+              href="/"
+              className="rounded-full px-3 py-1.5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--background-secondary)] hover:text-[var(--text-primary)]"
             >
-              {content.login}
+              {content.nav.home}
             </Link>
             <Link
-              href="/register"
-              className="text-sm font-medium px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg shadow-sm transition"
+              href="/about"
+              className="rounded-full px-3 py-1.5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--background-secondary)] hover:text-[var(--text-primary)]"
             >
-              {content.register}
+              {content.nav.about}
             </Link>
-          </Box>
+            <Link
+              href="/contact"
+              className="rounded-full px-3 py-1.5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--background-secondary)] hover:text-[var(--text-primary)]"
+            >
+              {content.nav.contact}
+            </Link>
+          </Nav>
         </Box>
-      </header>
+      </Header>
 
-      <Box className="flex-1">{children}</Box>
+      <Main className="flex-1">{children}</Main>
 
-      <footer className="bg-white border-t border-slate-200 py-8 mt-auto">
-        <Box className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-slate-500">
+      <Footer className="mt-auto px-4 pb-6 pt-8 sm:px-6 lg:px-8">
+        <Box className="mx-auto max-w-6xl rounded-2xl border border-[var(--line-soft)] bg-[var(--surface)] px-6 py-5 text-center text-sm font-medium text-[var(--text-secondary)] shadow-[0_8px_24px_rgba(15,29,50,0.08)]">
           © {new Date().getFullYear()} Next.js Setup. {content.footer}
         </Box>
-      </footer>
+      </Footer>
     </Box>
   )
 }
