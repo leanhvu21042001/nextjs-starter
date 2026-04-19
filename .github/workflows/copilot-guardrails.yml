@@ -1,0 +1,28 @@
+name: Copilot Guardrails
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  prevent-weak-service-typing:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify no weak service API typing
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if rg -n "ApiResponse<unknown>|ApiPaginatedResponse<unknown>" src/services; then
+            echo "Found forbidden unknown API response generic in src/services"
+            exit 1
+          fi
+
+          echo "Service typing guard passed"

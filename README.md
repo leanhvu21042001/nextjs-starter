@@ -22,6 +22,7 @@ Production-ready Next.js 16 starter with a typed DTO/Mapper pattern, reusable UI
 - Docker (Production)
 - UI Conventions
 - DTO + Mapper Architecture
+- GitHub Copilot Agent Template
 - Troubleshooting
 
 ## Quick Start
@@ -218,6 +219,22 @@ const payload = categoryMapper.create(uiData)
 const data = await fetcher.post('/categories', payload)
 return categoryMapper.fromResponse(data.data)
 ```
+
+## GitHub Copilot Agent Template
+
+Use this project as a repeatable template for new repositories.
+
+- Copy agent docs: [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md)
+- Copy .github setup: [.github/copilot-instructions.md](.github/copilot-instructions.md), [.github/prompts/scaffold-feature.prompt.md](.github/prompts/scaffold-feature.prompt.md), [.github/prompts/fix-service-types.prompt.md](.github/prompts/fix-service-types.prompt.md), [.github/workflows/ci.yml](.github/workflows/ci.yml)
+- Additional .github config: [.github/prompts/review-pr.prompt.md](.github/prompts/review-pr.prompt.md), [.github/pull_request_template.md](.github/pull_request_template.md), [.github/ISSUE_TEMPLATE/copilot-task.yml](.github/ISSUE_TEMPLATE/copilot-task.yml), [.github/workflows/copilot-guardrails.yml](.github/workflows/copilot-guardrails.yml)
+- Follow setup guide: [docs/copilot-agent-template.md](docs/copilot-agent-template.md)
+
+The template guide includes:
+
+- Copy-paste files for agent instructions
+- Required architecture conventions (DTO/mapper/service flow)
+- Build and quality gates that Copilot should always run
+- A project bootstrap checklist for new repos
 
 ## Troubleshooting
 

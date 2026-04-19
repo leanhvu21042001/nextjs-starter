@@ -11,7 +11,7 @@ export const authService = {
     const payload = authMapper.create(uiData)
 
     // TODO: Replace with real API call
-    // const data = await fetcher.post<ApiResponse<unknown>>('/auth/login', payload)
+    // const data = await fetcher.post<ApiResponse<AuthResponseDto>>('/auth/login', payload)
 
     // -- Fake response --
     await new Promise((resolve) => setTimeout(resolve, 800)) // delay
@@ -55,7 +55,7 @@ export const authService = {
     const payload = registerMapper.create(uiData)
 
     // TODO: Gọi API đăng ký thực tế
-    // const data = await fetcher.post<ApiResponse<unknown>>('/auth/register', payload)
+    // const data = await fetcher.post<ApiResponse<AuthResponseDto>>('/auth/register', payload)
 
     // -- Fake response --
     await new Promise((resolve) => setTimeout(resolve, 800)) // delay

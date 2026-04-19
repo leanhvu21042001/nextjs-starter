@@ -1,0 +1,59 @@
+name: Copilot Task
+description: Request an implementation task with repository guardrails.
+title: '[Copilot Task] '
+labels:
+  - copilot
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to request implementation work aligned with repository Copilot instructions.
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What should be implemented?
+      placeholder: Build category CRUD with schema, mapper, and service
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Files or folders that can be changed.
+      placeholder: src/schemas/category, src/services/category.service.ts, src/app/[locale]/dashboard/categories
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: typing-rules
+    attributes:
+      label: Service Typing Requirements
+      options:
+        - label: Use concrete DTO response generics
+          required: true
+        - label: Do not use ApiResponse<unknown> or ApiPaginatedResponse<unknown>
+          required: true
+        - label: Use explicit delete typing where needed
+          required: true
+
+  - type: checkboxes
+    id: quality
+    attributes:
+      label: Quality Gate
+      options:
+        - label: Run npm run lint
+          required: true
+        - label: Run npm run build
+          required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Define done conditions.
+      placeholder: Service methods are typed, mapper parses response, lint/build pass
+    validations:
+      required: true
