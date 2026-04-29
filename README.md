@@ -7,7 +7,7 @@ Production-ready Next.js 16 starter with a typed DTO/Mapper pattern, reusable UI
 - Next.js 16 (App Router)
 - React 19 + TypeScript
 - Zod v4 for schema validation
-- react-hook-form + zodResolver
+- react-hook-form + zodResolver + react-hot-toast (via `src/lib/form-client.ts`)
 - Tailwind CSS 4
 - react-data-grid
 
@@ -88,10 +88,9 @@ High-level structure:
 src/
   app/                  # App Router pages/layouts, including /api/log endpoint
   components/           # Reusable UI and feature components
+  domain/               # Feature domain modules (schema/mapper/service/types)
   hooks/                # Reusable hooks
   lib/                  # Shared utilities (fetcher, logger, mapper factory)
-  schemas/              # Zod schemas + mappers + DTO/model typing
-  services/             # App services (auth/category/...)
 ```
 
 Key files:
@@ -207,10 +206,11 @@ UI Input -> UI Schema Parse -> Payload Mapper -> API Call -> Response Schema Par
 
 ### Typical layers
 
-1. UI schema (form-level validation)
-2. Create/update/delete payload schemas
-3. Response schema
-4. Mapper transformations (`create`, `update`, `delete`, `fromResponse`, `fromList`)
+1. Feature schema (`src/domain/<feature>/<feature>.schema.ts`)
+2. Feature types (`src/domain/<feature>/<feature>.types.ts`)
+3. Feature mapper (`src/domain/<feature>/<feature>.mapper.ts`)
+4. Feature service (`src/domain/<feature>/<feature>.service.ts`)
+5. Feature exports (`src/domain/<feature>/index.ts`)
 
 Example usage in services:
 
@@ -228,6 +228,7 @@ Use this project as a repeatable template for new repositories.
 - Copy .github setup: [.github/copilot-instructions.md](.github/copilot-instructions.md), [.github/prompts/scaffold-feature.prompt.md](.github/prompts/scaffold-feature.prompt.md), [.github/prompts/fix-service-types.prompt.md](.github/prompts/fix-service-types.prompt.md), [.github/workflows/ci.yml](.github/workflows/ci.yml)
 - Additional .github config: [.github/prompts/review-pr.prompt.md](.github/prompts/review-pr.prompt.md), [.github/pull_request_template.md](.github/pull_request_template.md), [.github/ISSUE_TEMPLATE/copilot-task.yml](.github/ISSUE_TEMPLATE/copilot-task.yml), [.github/workflows/copilot-guardrails.yml](.github/workflows/copilot-guardrails.yml)
 - Follow setup guide: [docs/copilot-agent-template.md](docs/copilot-agent-template.md)
+- Enforce strict replication with: [docs/project-parity-contract.md](docs/project-parity-contract.md)
 
 The template guide includes:
 

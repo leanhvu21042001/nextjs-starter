@@ -65,9 +65,9 @@ Before implementing framework-specific logic, read the corresponding docs in nod
 
 Use this structure in all features:
 
-1. Schema layer in src/schemas/<feature>/
-2. Service layer in src/services/
-3. UI pages/components in src/app/ and src/components/
+1. Feature layer in src/domain/<feature>/
+2. UI pages/components in src/app/ and src/components/
+3. Shared utilities in src/lib/
 
 For each feature:
 
@@ -117,7 +117,7 @@ npm run typecheck
 1. Create Next.js app and install dependencies.
 2. Copy AGENTS.md and CLAUDE.md into the root.
 3. Add src/lib/fetcher.ts, src/lib/create-mapper.ts, and src/lib/api-response.ts patterns.
-4. Add feature folders under src/schemas and src/services.
+4. Add feature folders under src/domain.
 5. Implement at least one feature end-to-end using DTO + mapper + typed service.
 6. Verify lint and build pass.
 7. Add README section linking to agent docs.
@@ -150,7 +150,7 @@ Before finishing, run lint and build and fix any errors introduced by your chang
 
 Your new project is aligned if all are true:
 
-- No ApiResponse<unknown> or ApiPaginatedResponse<unknown> in src/services
+- No ApiResponse<unknown> or ApiPaginatedResponse<unknown> in src/domain/**/*.service.ts
 - Each feature has schema, mapper, DTO types, and service
 - API response parsing happens through mapper/schema flow
 - npm run lint passes

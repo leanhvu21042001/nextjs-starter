@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { getContactPageContent } from './page.content'
 import {
   Box,
   Button,
@@ -16,6 +15,8 @@ import {
 } from '@/components/ui'
 import { hasLocale } from '@/lib/i18n/config'
 import { createLocalizedMetadata } from '@/lib/seo'
+
+import { getContactPageContent } from './page.content'
 
 export async function generateMetadata({
   params,

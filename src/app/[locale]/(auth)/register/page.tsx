@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { RegisterForm } from './components/register-form'
-import { getRegisterPageContent } from './page.content'
 import { Box, Heading, Link, Main, Paragraph } from '@/components/ui'
 import { hasLocale } from '@/lib/i18n/config'
 import { createLocalizedMetadata } from '@/lib/seo'
+
+import { RegisterForm } from './components/register-form'
+import { getRegisterPageContent } from './page.content'
 
 /**
  * Route: /register

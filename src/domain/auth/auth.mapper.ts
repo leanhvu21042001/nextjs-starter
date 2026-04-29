@@ -1,13 +1,15 @@
-import { createMapper } from '@/lib/create-mapper'
-import {
-  loginUiSchema,
-  loginPayloadSchema,
-  registerUiSchema,
-  registerPayloadSchema,
-  authResponseSchema,
-} from './auth.schema'
-import type { AuthModel } from '@/schemas/auth/auth.types'
 import { z } from 'zod'
+
+import { createMapper } from '@/lib/create-mapper'
+
+import {
+  authResponseSchema,
+  loginPayloadSchema,
+  loginUiSchema,
+  registerPayloadSchema,
+  registerUiSchema,
+} from './auth.schema'
+import type { AuthModel } from './auth.types'
 
 // Fallback schemas for updates/deletes that don't apply to login
 const emptySchema = z.object({})

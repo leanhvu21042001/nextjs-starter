@@ -1,12 +1,13 @@
 import { createMapper } from '@/lib/create-mapper'
+
 import {
-  categoryUiSchema,
   categoryCreatePayloadSchema,
-  categoryUpdatePayloadSchema,
   categoryDeletePayloadSchema,
   categoryResponseSchema,
+  categoryUiSchema,
+  categoryUpdatePayloadSchema,
 } from './category.schema'
-import type { CategoryModel } from '@/schemas/category/category.types'
+import type { CategoryModel } from './category.types'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPER — tự động tạo slug từ name nếu không được điền

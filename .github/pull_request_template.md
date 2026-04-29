@@ -5,9 +5,9 @@ Describe what this PR changes.
 ## Architecture Checklist
 
 - [ ] Follows DTO + mapper flow for CRUD features
-- [ ] Keeps schemas in src/schemas/<feature>/
+- [ ] Keeps schemas in src/domain/<feature>/<feature>.schema.ts
 - [ ] Keeps mapping logic in mapper files (not page components)
-- [ ] Keeps HTTP calls in src/services/
+- [ ] Keeps HTTP calls in src/domain/<feature>/<feature>.service.ts
 
 ## Service Typing Checklist
 

@@ -1,4 +1,5 @@
 import { Box, Heading, Link, Main, Paragraph, Section } from '@/components/ui'
+
 import type { getPublicPageContent } from './page.content'
 
 type PublicPageContent = ReturnType<typeof getPublicPageContent>

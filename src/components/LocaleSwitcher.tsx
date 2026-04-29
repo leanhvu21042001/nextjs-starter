@@ -1,7 +1,9 @@
 'use client'
 
-import type { FC } from 'react'
 import Cookies from 'js-cookie'
+
+import type { FC } from 'react'
+
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 import { Box, Select } from '@/components/ui'

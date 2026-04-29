@@ -1,11 +1,12 @@
 import { z } from 'zod'
+
 import {
-  categoryUiSchema,
   categoryCreatePayloadSchema,
-  categoryUpdatePayloadSchema,
   categoryDeletePayloadSchema,
   categoryResponseSchema,
-} from '@/schemas/category/category.schema'
+  categoryUiSchema,
+  categoryUpdatePayloadSchema,
+} from './category.schema'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // UI DTO — shape của dữ liệu từ form (React Hook Form, etc.)

@@ -1,4 +1,5 @@
 import { cookies, headers } from 'next/headers'
+
 import { DEFAULT_LOCALE, LOCALE_COOKIE_NAME, type Locale, normalizeLocale } from '@/lib/i18n/config'
 
 export const getRequestLocale = async (): Promise<Locale> => {

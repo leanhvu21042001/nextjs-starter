@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { getMetadataContent } from './metadata.content'
-import { getPublicLayoutContent } from './layout.content'
+import { LocaleSwitcher } from '@/components/LocaleSwitcher'
 import { Box, Footer, Header, Link, Main, Nav } from '@/components/ui'
 import { hasLocale } from '@/lib/i18n/config'
 import { createLocalizedMetadata } from '@/lib/seo'
-import { LocaleSwitcher } from '@/components/LocaleSwitcher'
+
+import { getPublicLayoutContent } from './layout.content'
+import { getMetadataContent } from './metadata.content'
 
 export const generateMetadata = async ({
   params,

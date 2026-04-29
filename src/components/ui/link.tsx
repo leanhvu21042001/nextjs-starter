@@ -1,8 +1,9 @@
 'use client'
 
+import type { FC, PropsWithChildren } from 'react'
+
 import NextLink from 'next/link'
 import { useParams } from 'next/navigation'
-import type { FC, PropsWithChildren } from 'react'
 
 import { DEFAULT_LOCALE, hasLocale } from '@/lib/i18n/config'
 import { getLocalizedUrl } from '@/lib/i18n/routing'

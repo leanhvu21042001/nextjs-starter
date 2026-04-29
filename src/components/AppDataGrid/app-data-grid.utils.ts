@@ -1,4 +1,4 @@
-import { TColumn } from "./app-data-grid.types"
+import { TColumn } from './app-data-grid.types'
 
 const keyNoRow = 'STT' // number of row.
 

@@ -1,6 +1,7 @@
-import { authMapper, registerMapper } from '@/schemas/auth/auth.mapper'
-import type { LoginUiDto, RegisterUiDto, AuthModel } from '@/schemas/auth/auth.types'
 import Cookies from 'js-cookie'
+
+import { authMapper, registerMapper } from './auth.mapper'
+import type { AuthModel, LoginUiDto, RegisterUiDto } from './auth.types'
 
 export const authService = {
   /**

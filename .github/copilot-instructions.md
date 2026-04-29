@@ -11,9 +11,9 @@ Apply these instructions for all code suggestions and edits in this repository.
 ## Architecture Rules
 
 - Use DTO + mapper flow for CRUD features.
-- Keep zod schemas in src/schemas/<feature>/.
+- Keep zod schemas in src/domain/<feature>/<feature>.schema.ts.
 - Keep transformations in mapper files.
-- Keep HTTP calls in src/services/.
+- Keep HTTP calls in src/domain/<feature>/<feature>.service.ts.
 - Do not move mapping logic into page components.
 
 ## Service Typing Rules

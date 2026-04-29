@@ -1,6 +1,7 @@
-import { Button, Badge, Inline } from '@/components/ui'
-import type { GridToolbarViewProps } from './toolbar.types'
+import { Badge, Button, Inline } from '@/components/ui'
 import { Box } from '@/components/ui'
+
+import type { GridToolbarViewProps } from './toolbar.types'
 
 const isDisabled = (
   action: 'add' | 'save' | 'update' | 'delete' | 'refresh',

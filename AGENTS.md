@@ -13,9 +13,9 @@ Use these rules when building features in this repository and when copying this 
 ### Architecture
 
 - Use DTO + mapper flow for all CRUD features.
-- Keep validation in zod schemas under src/schemas/<feature>/.
+- Keep validation in zod schemas under src/domain/<feature>/<feature>.schema.ts.
 - Keep transformations in mapper files, not page components.
-- Keep HTTP calls in service files under src/services/.
+- Keep HTTP calls in service files under src/domain/<feature>/<feature>.service.ts.
 
 ### Service Typing
 

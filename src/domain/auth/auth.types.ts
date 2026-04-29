@@ -1,11 +1,12 @@
 import { z } from 'zod'
+
 import {
-  loginUiSchema,
-  loginPayloadSchema,
   authResponseSchema,
-  registerUiSchema,
+  loginPayloadSchema,
+  loginUiSchema,
   registerPayloadSchema,
-} from '@/schemas/auth/auth.schema'
+  registerUiSchema,
+} from './auth.schema'
 
 export type LoginUiDto = z.infer<typeof loginUiSchema>
 export type LoginPayloadDto = z.infer<typeof loginPayloadSchema>

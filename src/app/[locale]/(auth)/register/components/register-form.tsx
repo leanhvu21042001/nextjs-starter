@@ -1,15 +1,17 @@
 'use client'
 
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
+
+import { useRouter } from 'next/navigation'
+
 import { Box, Button, Form, Inline, Input, Label } from '@/components/ui'
-import { authService } from '@/services/auth.service'
-import { registerUiSchema } from '@/schemas/auth/auth.schema'
-import type { RegisterUiDto } from '@/schemas/auth/auth.types'
+import { type RegisterUiDto, authService, registerUiSchema } from '@/domain/auth'
 import { getErrorMessage } from '@/lib/utils'
+
 import type { RegisterPageContent } from '../page.content'
 
 export function RegisterForm({ content }: { content: RegisterPageContent }) {

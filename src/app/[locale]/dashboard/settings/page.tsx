@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
 
 import { Box, Heading, Main, Paragraph } from '@/components/ui'
-import { getSettingsPageContent } from './page.content'
 import { hasLocale } from '@/lib/i18n/config'
+
+import { getSettingsPageContent } from './page.content'
 
 export default async function SettingsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params

@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
 
 import { Box, Heading, Main, Paragraph } from '@/components/ui'
-import { getUsersPageContent } from './page.content'
 import { hasLocale } from '@/lib/i18n/config'
+
+import { getUsersPageContent } from './page.content'
 
 export default async function UsersPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params

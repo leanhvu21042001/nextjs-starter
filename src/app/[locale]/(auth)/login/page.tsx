@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { LoginForm } from './components/login-form'
-import { getLoginPageContent } from './page.content'
 import { Box, Heading, Link, Main, Paragraph } from '@/components/ui'
 import { hasLocale } from '@/lib/i18n/config'
 import { createLocalizedMetadata } from '@/lib/seo'
+
+import { LoginForm } from './components/login-form'
+import { getLoginPageContent } from './page.content'
 
 /**
  * Route: /login

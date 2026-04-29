@@ -1,4 +1,5 @@
 import NextImage, { type ImageProps as NextImageProps } from 'next/image'
+
 import { cn } from '@/lib/utils'
 
 type LoadingType = 'eager' | 'lazy'

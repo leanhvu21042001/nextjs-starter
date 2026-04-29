@@ -1,12 +1,10 @@
 'use client'
-import { deepPickStringValue, exportToCsv } from '@/lib/utils'
-import { logger } from '@/lib/logger'
 import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import {
   CalculatedColumn,
   CellCopyArgs,
-  CellKeyboardEvent,
   CellKeyDownArgs,
+  CellKeyboardEvent,
   CellMouseArgs,
   CellMouseEvent,
   CellPasteArgs,
@@ -18,15 +16,17 @@ import {
   SelectColumn,
   SortColumn,
 } from 'react-data-grid'
-import { flushSync } from 'react-dom'
-
 // required import to have styles
 import 'react-data-grid/lib/styles.css'
+import { flushSync } from 'react-dom'
+
+import useDebounce from '@/hooks/use-debounce'
+import { logger } from '@/lib/logger'
+import { deepPickStringValue, exportToCsv } from '@/lib/utils'
 
 import {
-  Button,
   Box,
-  Inline,
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -34,11 +34,11 @@ import {
   DialogHeader,
   DialogTitle,
   Empty,
+  Inline,
   Input,
   Label,
   Select,
 } from '../ui'
-import useDebounce from '@/hooks/use-debounce'
 import type {
   OptionsSelect,
   TColumn,
@@ -47,8 +47,8 @@ import type {
   TKeyGrid,
 } from './app-data-grid.types'
 import { isNoSearch } from './app-data-grid.utils'
-import { GridToolbar } from './toolbar'
 import { runWithConcurrency } from './concurrency'
+import { GridToolbar } from './toolbar'
 import type {
   CrudAction,
   GridToolbarConfig,

@@ -1,5 +1,5 @@
 import { Key } from 'react'
-import type { Direction, Column } from 'react-data-grid'
+import type { Column, Direction } from 'react-data-grid'
 
 export type OptionsSelect = { label: string; value: unknown }
 
