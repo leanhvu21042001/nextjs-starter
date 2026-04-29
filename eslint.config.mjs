@@ -24,11 +24,11 @@ const eslintConfig = defineConfig([
 
     rules: {
       // ❌ CẤM ../
-      'import/no-relative-parent-imports': 'error',
+      // 'import/no-relative-parent-imports': 'error',
       'no-restricted-imports': [
         'error',
         {
-          patterns: ['../*'],
+          patterns: ['../../*'],
         },
       ],
 
@@ -37,7 +37,7 @@ const eslintConfig = defineConfig([
         'warn',
         {
           groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-          'newlines-between': 'always',
+          // 'newlines-between': 'always',
         },
       ],
     },

@@ -3,6 +3,7 @@
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'
+import { Image } from './image'
 
 const sizeStyles = {
   sm: 'h-8 w-8 text-xs',
@@ -34,7 +35,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         {...props}
       >
         {!showFallback && (
-          <img
+          <Image
             src={src}
             alt={alt ?? ''}
             className="aspect-square h-full w-full object-cover"
