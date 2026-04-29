@@ -4,8 +4,8 @@ import { useRouter } from 'next/navigation'
 
 import { Box, Button, Form, Inline, Input, Label } from '@/components/ui'
 import { type RegisterUiDto, registerUiSchema, useRegisterMutation } from '@/domain/auth'
+import { resolveErrorMessage } from '@/lib/error/resolve-error-message'
 import { toast, useForm, zodResolver } from '@/lib/form-client'
-import { getErrorMessage } from '@/lib/utils'
 
 import type { RegisterPageContent } from '../page.content'
 
@@ -28,7 +28,7 @@ export function RegisterForm({ content }: { content: RegisterPageContent }) {
       toast.success(content.form.success)
       router.push('/dashboard')
     } catch (error) {
-      toast.error(getErrorMessage(error))
+      toast.error(resolveErrorMessage(error))
     }
   }
 
@@ -45,7 +45,11 @@ export function RegisterForm({ content }: { content: RegisterPageContent }) {
           {...register('name')}
           className={errors.name ? 'border-red-500 focus:ring-red-500' : ''}
         />
-        {errors.name && <Inline className="text-xs text-red-500">{errors.name.message}</Inline>}
+        {errors.name && (
+          <Inline className="text-xs text-red-500">
+            {resolveErrorMessage(errors.name.message)}
+          </Inline>
+        )}
       </Box>
 
       <Box className="rounded-none border-0 bg-transparent p-0 shadow-none flex flex-col gap-2">
@@ -59,7 +63,11 @@ export function RegisterForm({ content }: { content: RegisterPageContent }) {
           {...register('email')}
           className={errors.email ? 'border-red-500 focus:ring-red-500' : ''}
         />
-        {errors.email && <Inline className="text-xs text-red-500">{errors.email.message}</Inline>}
+        {errors.email && (
+          <Inline className="text-xs text-red-500">
+            {resolveErrorMessage(errors.email.message)}
+          </Inline>
+        )}
       </Box>
 
       <Box className="rounded-none border-0 bg-transparent p-0 shadow-none flex flex-col gap-2">
@@ -74,7 +82,9 @@ export function RegisterForm({ content }: { content: RegisterPageContent }) {
           className={errors.password ? 'border-red-500 focus:ring-red-500' : ''}
         />
         {errors.password && (
-          <Inline className="text-xs text-red-500">{errors.password.message}</Inline>
+          <Inline className="text-xs text-red-500">
+            {resolveErrorMessage(errors.password.message)}
+          </Inline>
         )}
       </Box>
 
@@ -90,7 +100,9 @@ export function RegisterForm({ content }: { content: RegisterPageContent }) {
           className={errors.confirmPassword ? 'border-red-500 focus:ring-red-500' : ''}
         />
         {errors.confirmPassword && (
-          <Inline className="text-xs text-red-500">{errors.confirmPassword.message}</Inline>
+          <Inline className="text-xs text-red-500">
+            {resolveErrorMessage(errors.confirmPassword.message)}
+          </Inline>
         )}
       </Box>
 

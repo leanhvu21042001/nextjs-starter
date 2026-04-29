@@ -22,6 +22,7 @@ Production-ready Next.js 16 starter with a typed DTO/Mapper pattern, reusable UI
 - Docker (Production)
 - UI Conventions
 - DTO + Mapper Architecture
+- Error Handling (Code + i18n)
 - GitHub Copilot Agent Template
 - Troubleshooting
 
@@ -218,6 +219,63 @@ Example usage in services:
 const payload = categoryMapper.create(uiData)
 const data = await fetcher.post('/categories', payload)
 return categoryMapper.fromResponse(data.data)
+```
+
+## Error Handling (Code + i18n)
+
+This project standardizes errors with a code-first model and locale-aware rendering.
+
+### Error Flow
+
+```text
+Unknown Error -> toAppError() -> resolveErrorMessage() -> locale catalog -> ICU interpolation
+```
+
+### Core Files
+
+- [src/domain/error/error.codes.ts](src/domain/error/error.codes.ts): global error codes (`VALIDATION_*`, `AUTH_*`, `NET_*`, `BUSINESS_*`, `SYS_*`)
+- [src/domain/error/error.types.ts](src/domain/error/error.types.ts): `AppError` + `params` + `customMessage`
+- [src/domain/error/error.mapper.ts](src/domain/error/error.mapper.ts): maps `FetchError`, `ZodError`, and unknown errors to `AppError`
+- [src/lib/i18n/errors/en.ts](src/lib/i18n/errors/en.ts), [src/lib/i18n/errors/vi.ts](src/lib/i18n/errors/vi.ts): localized catalogs by error code
+- [src/lib/i18n/format-message.ts](src/lib/i18n/format-message.ts): ICU message formatting via `intl-messageformat`
+- [src/lib/error/resolve-error-message.ts](src/lib/error/resolve-error-message.ts): final user-facing message resolver
+
+### API Error Envelope
+
+When possible, APIs should return this shape for non-2xx responses:
+
+```json
+{
+  "code": "NET_NOT_FOUND",
+  "message": "Category not found",
+  "params": {
+    "resource": "category",
+    "id": "123"
+  }
+}
+```
+
+The resolver will use:
+
+1. `customMessage` (if explicitly set in `AppError`)
+2. Catalog message by `code`
+3. Fallback `SYS_UNEXPECTED`
+
+### Dynamic Message Variables
+
+Catalog messages can include placeholders and are formatted with ICU MessageFormat.
+
+Examples:
+
+- `Resource {resource} (ID: {id}) was not found.`
+- `Không thể thực hiện thao tác: {reason}.`
+
+Usage example:
+
+```ts
+throw new AppError(ERROR_CODES.BUSINESS_CONFLICT, {
+  params: { reason: 'Category is used by products' },
+})
 ```
 
 ## GitHub Copilot Agent Template

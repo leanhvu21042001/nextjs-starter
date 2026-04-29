@@ -1,5 +1,7 @@
 import Cookies from 'js-cookie'
 
+import { AppError, ERROR_CODES } from '@/domain/error'
+
 import { authMapper, registerMapper } from './auth.mapper'
 import type { AuthModel, LoginUiDto, RegisterUiDto } from './auth.types'
 
@@ -17,12 +19,10 @@ export const authService = {
     // -- Fake response --
     await new Promise((resolve) => setTimeout(resolve, 800)) // delay
     if (payload.email !== 'admin@example.com' || payload.password !== '123456') {
-      const message =
-        process.env.NODE_ENV === 'production'
-          ? 'Email hoặc mật khẩu không đúng.'
-          : 'Email hoặc mật khẩu không đúng. Vô Admin: admin@example.com / 123456'
-
-      throw new Error(message)
+      throw new AppError(ERROR_CODES.AUTH_INVALID_CREDENTIALS, {
+        category: 'auth',
+        status: 401,
+      })
     }
     const fakeApiResponse = {
       accessToken: 'fake-jwt-token-12345',

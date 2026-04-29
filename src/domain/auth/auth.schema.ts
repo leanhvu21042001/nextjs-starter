@@ -1,8 +1,14 @@
 import { z } from 'zod'
 
+import { ERROR_CODES } from '@/domain/error'
+
 export const loginUiSchema = z.object({
-  email: z.string({ error: 'Email là bắt buộc' }).email('Email không đúng định dạng'),
-  password: z.string({ error: 'Mật khẩu là bắt buộc' }).min(6, 'Mật khẩu phải từ 6 ký tự trở lên'),
+  email: z
+    .string({ error: ERROR_CODES.VALIDATION_REQUIRED })
+    .email(ERROR_CODES.VALIDATION_INVALID_EMAIL),
+  password: z
+    .string({ error: ERROR_CODES.VALIDATION_REQUIRED })
+    .min(6, ERROR_CODES.VALIDATION_PASSWORD_MIN_LENGTH),
 })
 
 export const loginPayloadSchema = z.object({
@@ -21,15 +27,19 @@ export const authResponseSchema = z.object({
 
 export const registerUiSchema = z
   .object({
-    name: z.string({ error: 'Họ và tên là bắt buộc' }).min(2, 'Vui lòng nhập họ và tên hợp lệ'),
-    email: z.string({ error: 'Email là bắt buộc' }).email('Email không đúng định dạng'),
+    name: z
+      .string({ error: ERROR_CODES.VALIDATION_REQUIRED })
+      .min(2, ERROR_CODES.VALIDATION_INVALID_INPUT),
+    email: z
+      .string({ error: ERROR_CODES.VALIDATION_REQUIRED })
+      .email(ERROR_CODES.VALIDATION_INVALID_EMAIL),
     password: z
-      .string({ error: 'Mật khẩu là bắt buộc' })
-      .min(6, 'Mật khẩu phải từ 6 ký tự trở lên'),
-    confirmPassword: z.string({ error: 'Vui lòng xác nhận mật khẩu' }),
+      .string({ error: ERROR_CODES.VALIDATION_REQUIRED })
+      .min(6, ERROR_CODES.VALIDATION_PASSWORD_MIN_LENGTH),
+    confirmPassword: z.string({ error: ERROR_CODES.VALIDATION_REQUIRED }),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: 'Mật khẩu xác nhận không khớp',
+    message: ERROR_CODES.VALIDATION_PASSWORD_MISMATCH,
     path: ['confirmPassword'],
   })
 

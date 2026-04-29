@@ -4,8 +4,8 @@ import { useRouter } from 'next/navigation'
 
 import { Box, Button, Form, Inline, Input, Label, Link } from '@/components/ui'
 import { type LoginUiDto, loginUiSchema, useLoginMutation } from '@/domain/auth'
+import { resolveErrorMessage } from '@/lib/error/resolve-error-message'
 import { toast, useForm, zodResolver } from '@/lib/form-client'
-import { getErrorMessage } from '@/lib/utils'
 
 import type { LoginPageContent } from '../page.content'
 
@@ -28,7 +28,7 @@ export function LoginForm({ content }: { content: LoginPageContent }) {
       toast.success(content.form.success)
       router.push('/dashboard')
     } catch (error) {
-      toast.error(getErrorMessage(error))
+      toast.error(resolveErrorMessage(error))
     }
   }
 
@@ -45,7 +45,11 @@ export function LoginForm({ content }: { content: LoginPageContent }) {
           {...register('email')}
           className={errors.email ? 'border-red-500 focus:ring-red-500' : ''}
         />
-        {errors.email && <Inline className="text-xs text-red-500">{errors.email.message}</Inline>}
+        {errors.email && (
+          <Inline className="text-xs text-red-500">
+            {resolveErrorMessage(errors.email.message)}
+          </Inline>
+        )}
       </Box>
 
       <Box className="rounded-none border-0 bg-transparent p-0 shadow-none flex flex-col gap-2">
@@ -68,7 +72,9 @@ export function LoginForm({ content }: { content: LoginPageContent }) {
           className={errors.password ? 'border-red-500 focus:ring-red-500' : ''}
         />
         {errors.password && (
-          <Inline className="text-xs text-red-500">{errors.password.message}</Inline>
+          <Inline className="text-xs text-red-500">
+            {resolveErrorMessage(errors.password.message)}
+          </Inline>
         )}
       </Box>
 

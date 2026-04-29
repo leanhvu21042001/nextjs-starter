@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { ERROR_CODES } from '@/domain/error'
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. UI SCHEMA — validate dữ liệu nhập từ form (phía client)
 //    Dùng để validate trước khi gửi đi, field names match với form fields.
@@ -9,25 +11,21 @@ const CATEGORY_STATUS = ['active', 'inactive'] as const
 
 export const categoryUiSchema = z.object({
   name: z
-    .string({ error: 'Tên danh mục là bắt buộc' })
-    .min(2, 'Tên danh mục phải có ít nhất 2 ký tự')
-    .max(100, 'Tên danh mục không được vượt quá 100 ký tự')
+    .string({ error: ERROR_CODES.VALIDATION_REQUIRED })
+    .min(2, ERROR_CODES.VALIDATION_MIN_LENGTH)
+    .max(100, ERROR_CODES.VALIDATION_MAX_LENGTH)
     .trim(),
 
   slug: z
     .string()
-    .max(120, 'Slug không được vượt quá 120 ký tự')
-    .regex(/^[a-z0-9-]*$/, 'Slug chỉ chứa chữ thường, số và dấu gạch ngang')
+    .max(120, ERROR_CODES.VALIDATION_MAX_LENGTH)
+    .regex(/^[a-z0-9-]*$/, ERROR_CODES.VALIDATION_INVALID_FORMAT)
     .optional()
     .or(z.literal('')),
 
-  description: z
-    .string()
-    .max(500, 'Mô tả không được vượt quá 500 ký tự')
-    .optional()
-    .or(z.literal('')),
+  description: z.string().max(500, ERROR_CODES.VALIDATION_MAX_LENGTH).optional().or(z.literal('')),
 
-  status: z.enum(CATEGORY_STATUS, { error: 'Trạng thái không hợp lệ' }),
+  status: z.enum(CATEGORY_STATUS, { error: ERROR_CODES.VALIDATION_INVALID_ENUM }),
 })
 
 // ─────────────────────────────────────────────────────────────────────────────

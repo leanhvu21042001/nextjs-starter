@@ -1,3 +1,4 @@
+import { AppError, toAppError } from '@/domain/error'
 import type { ApiPaginatedResponse, ApiResponse } from '@/lib/api-response'
 import fetcher from '@/lib/fetcher'
 
@@ -15,6 +16,21 @@ export type GetCategoriesParams = {
   status?: 'active' | 'inactive'
 }
 
+function withErrorContext(
+  error: unknown,
+  params: Record<string, string | number | boolean>,
+): AppError {
+  const appError = toAppError(error)
+
+  return new AppError(appError.code, {
+    ...appError.options,
+    params: {
+      ...appError.params,
+      ...params,
+    },
+  })
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // CATEGORY SERVICE
 // ─────────────────────────────────────────────────────────────────────────────
@@ -24,16 +40,20 @@ export const categoryService = {
    * GET /categories — lấy danh sách categories (có phân trang)
    */
   async getList(params?: GetCategoriesParams): Promise<ApiPaginatedResponse<CategoryModel>> {
-    const data = await fetcher.get<ApiPaginatedResponse<CategoryResponseDto>>('/categories', {
-      params,
-    })
+    try {
+      const data = await fetcher.get<ApiPaginatedResponse<CategoryResponseDto>>('/categories', {
+        params,
+      })
 
-    return {
-      ...data,
-      data: {
-        ...data.data,
-        items: categoryMapper.fromList(data.data.items),
-      },
+      return {
+        ...data,
+        data: {
+          ...data.data,
+          items: categoryMapper.fromList(data.data.items),
+        },
+      }
+    } catch (error) {
+      throw toAppError(error)
     }
   },
 
@@ -41,8 +61,12 @@ export const categoryService = {
    * GET /categories/:id — lấy chi tiết một category
    */
   async getById(id: string): Promise<CategoryModel> {
-    const data = await fetcher.get<ApiResponse<CategoryResponseDto>>(`/categories/${id}`)
-    return categoryMapper.fromResponse(data.data)
+    try {
+      const data = await fetcher.get<ApiResponse<CategoryResponseDto>>(`/categories/${id}`)
+      return categoryMapper.fromResponse(data.data)
+    } catch (error) {
+      throw withErrorContext(error, { resource: 'category', id })
+    }
   },
 
   /**
@@ -51,10 +75,14 @@ export const categoryService = {
    */
   async create(uiData: CategoryUiDto): Promise<CategoryModel> {
     // Mapper validate UI input → tạo API payload
-    const payload = categoryMapper.create(uiData)
+    try {
+      const payload = categoryMapper.create(uiData)
 
-    const data = await fetcher.post<ApiResponse<CategoryResponseDto>>('/categories', payload)
-    return categoryMapper.fromResponse(data.data)
+      const data = await fetcher.post<ApiResponse<CategoryResponseDto>>('/categories', payload)
+      return categoryMapper.fromResponse(data.data)
+    } catch (error) {
+      throw withErrorContext(error, { resource: 'category', name: uiData.name })
+    }
   },
 
   /**
@@ -64,10 +92,14 @@ export const categoryService = {
    */
   async update(id: string, uiData: CategoryUiDto): Promise<CategoryModel> {
     // Mapper validate UI input → tạo API payload (kèm id)
-    const payload = categoryMapper.update(uiData, id)
+    try {
+      const payload = categoryMapper.update(uiData, id)
 
-    const data = await fetcher.put<ApiResponse<CategoryResponseDto>>(`/categories/${id}`, payload)
-    return categoryMapper.fromResponse(data.data)
+      const data = await fetcher.put<ApiResponse<CategoryResponseDto>>(`/categories/${id}`, payload)
+      return categoryMapper.fromResponse(data.data)
+    } catch (error) {
+      throw withErrorContext(error, { resource: 'category', id, name: uiData.name })
+    }
   },
 
   /**
@@ -76,8 +108,12 @@ export const categoryService = {
    */
   async delete(id: string): Promise<void> {
     // Mapper validate id là UUID hợp lệ
-    const payload = categoryMapper.delete(id)
+    try {
+      const payload = categoryMapper.delete(id)
 
-    await fetcher.delete<void>(`/categories/${payload.id}`)
+      await fetcher.delete<void>(`/categories/${payload.id}`)
+    } catch (error) {
+      throw withErrorContext(error, { resource: 'category', id })
+    }
   },
 }

@@ -3,6 +3,8 @@ import { join } from 'node:path'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { ERROR_CODES } from '@/domain/error'
+
 export const runtime = 'nodejs'
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error'
@@ -81,12 +83,26 @@ const sanitizePayload = (payload: IncomingLogPayload) => {
 
 export async function POST(request: NextRequest) {
   if (!isAllowedOrigin(request)) {
-    return NextResponse.json({ error: 'Forbidden origin' }, { status: 403 })
+    return NextResponse.json(
+      {
+        code: ERROR_CODES.NET_FORBIDDEN,
+        message: 'Forbidden origin',
+        params: { resource: 'log' },
+      },
+      { status: 403 },
+    )
   }
 
   const contentLength = Number(request.headers.get('content-length') ?? '0')
   if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
-    return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
+    return NextResponse.json(
+      {
+        code: ERROR_CODES.NET_PAYLOAD_TOO_LARGE,
+        message: 'Payload too large',
+        params: { maxBytes: MAX_BODY_BYTES },
+      },
+      { status: 413 },
+    )
   }
 
   try {
@@ -102,6 +118,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true }, { status: 201 })
   } catch {
-    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
+    return NextResponse.json(
+      {
+        code: ERROR_CODES.NET_BAD_REQUEST,
+        message: 'Invalid payload',
+        params: { resource: 'log' },
+      },
+      { status: 400 },
+    )
   }
 }
