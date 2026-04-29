@@ -1,22 +1,17 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'react-hot-toast'
-
 import { useRouter } from 'next/navigation'
 
 import { Box, Button, Form, Inline, Input, Label } from '@/components/ui'
-import { type RegisterUiDto, authService, registerUiSchema } from '@/domain/auth'
+import { type RegisterUiDto, registerUiSchema, useRegisterMutation } from '@/domain/auth'
+import { toast, useForm, zodResolver } from '@/lib/form-client'
 import { getErrorMessage } from '@/lib/utils'
 
 import type { RegisterPageContent } from '../page.content'
 
 export function RegisterForm({ content }: { content: RegisterPageContent }) {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const registerMutation = useRegisterMutation()
 
   const {
     register,
@@ -28,15 +23,12 @@ export function RegisterForm({ content }: { content: RegisterPageContent }) {
   })
 
   const onSubmit = async (data: RegisterUiDto) => {
-    setLoading(true)
     try {
-      await authService.register(data)
+      await registerMutation.mutateAsync(data)
       toast.success(content.form.success)
       router.push('/dashboard')
     } catch (error) {
       toast.error(getErrorMessage(error))
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -104,10 +96,10 @@ export function RegisterForm({ content }: { content: RegisterPageContent }) {
 
       <Button
         type="submit"
-        disabled={loading}
+        disabled={registerMutation.isPending}
         className="w-full mt-1 h-11 rounded-xl font-semibold"
       >
-        {loading ? content.form.submitting : content.form.submit}
+        {registerMutation.isPending ? content.form.submitting : content.form.submit}
       </Button>
     </Form>
   )

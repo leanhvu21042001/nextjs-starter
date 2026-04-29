@@ -1,18 +1,17 @@
 'use client'
 
-import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from 'react-hot-toast'
+
 import { Box, Button, Form, Inline, Input, Label, Link } from '@/components/ui'
-import { authService, loginUiSchema, type LoginUiDto } from '@/domain/auth'
+import { type LoginUiDto, loginUiSchema, useLoginMutation } from '@/domain/auth'
+import { toast, useForm, zodResolver } from '@/lib/form-client'
 import { getErrorMessage } from '@/lib/utils'
+
 import type { LoginPageContent } from '../page.content'
 
 export function LoginForm({ content }: { content: LoginPageContent }) {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const loginMutation = useLoginMutation()
 
   const {
     register,
@@ -24,15 +23,12 @@ export function LoginForm({ content }: { content: LoginPageContent }) {
   })
 
   const onSubmit = async (data: LoginUiDto) => {
-    setLoading(true)
     try {
-      await authService.login(data)
+      await loginMutation.mutateAsync(data)
       toast.success(content.form.success)
       router.push('/dashboard')
     } catch (error) {
       toast.error(getErrorMessage(error))
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -78,10 +74,10 @@ export function LoginForm({ content }: { content: LoginPageContent }) {
 
       <Button
         type="submit"
-        disabled={loading}
+        disabled={loginMutation.isPending}
         className="w-full mt-1 h-11 rounded-xl font-semibold"
       >
-        {loading ? content.form.submitting : content.form.submit}
+        {loginMutation.isPending ? content.form.submitting : content.form.submit}
       </Button>
     </Form>
   )
