@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 
 import { Box, Button, Form, Inline, Input, Label, Link } from '@/components/ui'
-import { type LoginUiDto, loginUiSchema, useLoginMutation } from '@/domain/auth'
+import { type LoginUiDto, loginUiSchema, useLoginUseCase } from '@/domain/auth'
 import { resolveErrorMessage } from '@/lib/error/resolve-error-message'
 import { toast, useForm, zodResolver } from '@/lib/form-client'
 
@@ -11,7 +11,7 @@ import type { LoginPageContent } from '../page.content'
 
 export function LoginForm({ content }: { content: LoginPageContent }) {
   const router = useRouter()
-  const loginMutation = useLoginMutation()
+  const loginMutation = useLoginUseCase()
 
   const {
     register,

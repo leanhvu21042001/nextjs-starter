@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 
 import { Box, Button, Form, Inline, Input, Label } from '@/components/ui'
-import { type RegisterUiDto, registerUiSchema, useRegisterMutation } from '@/domain/auth'
+import { type RegisterUiDto, registerUiSchema, useRegisterUseCase } from '@/domain/auth'
 import { resolveErrorMessage } from '@/lib/error/resolve-error-message'
 import { toast, useForm, zodResolver } from '@/lib/form-client'
 
@@ -11,7 +11,7 @@ import type { RegisterPageContent } from '../page.content'
 
 export function RegisterForm({ content }: { content: RegisterPageContent }) {
   const router = useRouter()
-  const registerMutation = useRegisterMutation()
+  const registerMutation = useRegisterUseCase()
 
   const {
     register,

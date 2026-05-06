@@ -1,20 +1,11 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
-export type TOptionsUseMutation = Omit<Parameters<typeof useMutation>[0], 'mutationFn'>
+type TOptionsUseMutationBase = Parameters<typeof useMutation>[0]
+export type TParametersUseMutation = Parameters<typeof useMutation>[0]
 
-export const useMutationBase = ({
-  mutationFn,
-  options = {},
-}: {
-  mutationFn: Parameters<typeof useMutation>[0]['mutationFn']
-  options?: TOptionsUseMutation
-}) => {
-  const queryClient = useQueryClient()
-  return useMutation(
-    {
-      mutationFn,
-      ...options,
-    },
-    queryClient,
-  )
+export const useMutationBase = (options: TOptionsUseMutationBase) => {
+  return useMutation({
+    mutationFn: options.mutationFn,
+    ...options,
+  })
 }

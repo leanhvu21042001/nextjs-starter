@@ -10,7 +10,14 @@ import {
   type TComparator,
   type TGenColumn,
 } from '@/components/AppDataGrid'
-import { type TCategoryUi, categoryService } from '@/domain/category'
+import {
+  type TCategoryUi,
+  useCreateCategoryUseCase,
+  useDeleteCategoryUseCase,
+  useGetCategoryUseCase,
+  useUpdateCategoryUseCase,
+} from '@/domain/category'
+import type { ApiPaginatedResponse } from '@/lib/api-response'
 import { formatters } from '@/lib/formatters'
 
 type CategoryRow = TCategoryUi
@@ -134,6 +141,10 @@ const genColumns: TGenColumn<CategoryRow, CategorySummaryRow> = () => {
 
 export function TasksGrid() {
   const [rows, setRows] = useState<readonly CategoryRow[]>([])
+  const { refetch: refetchCategories } = useGetCategoryUseCase({ enabled: false })
+  const createCategoryMutation = useCreateCategoryUseCase()
+  const updateCategoryMutation = useUpdateCategoryUseCase()
+  const deleteCategoryMutation = useDeleteCategoryUseCase()
 
   const createMutationResult = (
     action: 'add' | 'update' | 'delete',
@@ -152,19 +163,14 @@ export function TasksGrid() {
     let mounted = true
 
     const loadCategories = async () => {
-      const response = await categoryService
-        .getList
-        // {
-        //   page: 1,
-        //   pageSize: 100
-        // }
-        ()
+      const result = await refetchCategories()
+      const response = result.data as ApiPaginatedResponse<CategoryRow> | undefined
 
       if (!mounted) {
         return
       }
 
-      setRows(response.data.items)
+      setRows(response?.data.items ?? [])
     }
 
     loadCategories().catch(() => {
@@ -176,7 +182,7 @@ export function TasksGrid() {
     return () => {
       mounted = false
     }
-  }, [])
+  }, [refetchCategories])
 
   const toolbarConfig = useMemo<GridToolbarConfig<CategoryRow>>(
     () => ({
@@ -240,19 +246,22 @@ export function TasksGrid() {
       },
       handlers: {
         onAdd: async (row) => {
-          const created = await categoryService.create(row)
+          const created = (await createCategoryMutation.mutateAsync(row)) as CategoryRow
           setRows((prevRows) => [...prevRows, created])
           return created
         },
 
         onUpdate: async (row) => {
-          const updated = await categoryService.update(row.id, row)
+          const updated = (await updateCategoryMutation.mutateAsync({
+            id: row.id,
+            data: row,
+          })) as CategoryRow
           setRows((prevRows) => prevRows.map((item) => (item.id === updated.id ? updated : item)))
           return updated
         },
 
         onDelete: async (row) => {
-          await categoryService.delete(row.id)
+          await deleteCategoryMutation.mutateAsync(row.id)
           setRows((prevRows) => prevRows.filter((item) => item.id !== row.id))
         },
 
@@ -262,25 +271,18 @@ export function TasksGrid() {
             // const status = params?.status
             // const search = String(params?.search ?? '').trim()
 
-            const response = await categoryService
-              .getList
-              // {
-              //   page: 1,
-              //   pageSize: 100,
-              //   search: search || undefined,
-              //   status: status === 'active' || status === 'inactive' ? status : undefined,
-              // }
-              ()
-
-            setRows(response.data.items)
-            return response.data.items
+            const result = await refetchCategories()
+            const response = result.data as ApiPaginatedResponse<CategoryRow> | undefined
+            const items = response?.data.items ?? []
+            setRows(items)
+            return items
           },
 
         onAddMany: async (items) => {
           const results = await Promise.all(
             items.map(async (item) => {
               try {
-                const created = await categoryService.create(item)
+                const created = (await createCategoryMutation.mutateAsync(item)) as CategoryRow
                 setRows((prevRows) => [...prevRows, created])
                 return createMutationResult('add', created, 'success')
               } catch (error) {
@@ -301,7 +303,10 @@ export function TasksGrid() {
           const results = await Promise.all(
             items.map(async (item) => {
               try {
-                const updated = await categoryService.update(item.id, item)
+                const updated = (await updateCategoryMutation.mutateAsync({
+                  id: item.id,
+                  data: item,
+                })) as CategoryRow
                 setRows((prevRows) =>
                   prevRows.map((dbItem) => (dbItem.id === updated.id ? updated : dbItem)),
                 )
@@ -325,7 +330,7 @@ export function TasksGrid() {
           const results = await Promise.all(
             items.map(async (item) => {
               try {
-                await categoryService.delete(item.id)
+                await deleteCategoryMutation.mutateAsync(item.id)
                 setRows((prevRows) => prevRows.filter((dbItem) => dbItem.id !== item.id))
                 return createMutationResult('delete', item, 'success')
               } catch (error) {
@@ -343,7 +348,7 @@ export function TasksGrid() {
         },
       },
     }),
-    [],
+    [createCategoryMutation, deleteCategoryMutation, refetchCategories, updateCategoryMutation],
   )
 
   return (

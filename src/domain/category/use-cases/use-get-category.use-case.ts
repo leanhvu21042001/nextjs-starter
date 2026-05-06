@@ -1,9 +1,9 @@
-import { TOptionsUseQuery, useQueryBase } from '@/hooks/use-query-base'
+import { TParametersUseQuery, useQueryBase } from '@/hooks/use-query-base'
 
 import { categoryService } from '../category.service'
 import { categoryQueryKeys } from './query-keys'
 
-export const useGetCategoryUseCase = (options?: TOptionsUseQuery) => {
+export const useGetCategoryUseCase = (options?: TParametersUseQuery) => {
   return useQueryBase({
     queryKey: categoryQueryKeys.getList(),
     queryFn: async () => {

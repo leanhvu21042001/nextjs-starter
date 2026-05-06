@@ -24,7 +24,9 @@ const categoryModelSchema = z.object({
     .optional()
     .or(z.literal('')),
   description: z.string().nullable().optional().or(z.literal('')),
-  status: CATEGORY_STATUS,
+  status: z.enum(CATEGORY_STATUS.options, {
+    error: ERROR_CODES.VALIDATION_INVALID_ENUM,
+  }),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 })
@@ -40,16 +42,7 @@ const categoryModelSchema = z.object({
 //    Dùng để validate trước khi gửi đi, field names match với form fields.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const categoryUiSchema = z.object({
-  id: categoryModelSchema.shape.id,
-  name: categoryModelSchema.shape.name,
-  slug: categoryModelSchema.shape.slug,
-  description: categoryModelSchema.shape.description,
-  status: z.enum(categoryModelSchema.shape.status.options, {
-    error: ERROR_CODES.VALIDATION_INVALID_ENUM,
-  }),
-
-  // optional fields for UI state, not sent to API if undefined
+const categoryUiSchema = categoryModelSchema.clone().extend({
   createdAt: categoryModelSchema.shape.createdAt.optional(),
   updatedAt: categoryModelSchema.shape.updatedAt.optional(),
 })
@@ -59,24 +52,15 @@ const categoryUiSchema = z.object({
 //    Field names phải khớp với API contract.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const categoryCreatePayloadSchema = z.object({
-  name: categoryModelSchema.shape.name,
-  slug: categoryModelSchema.shape.slug,
-  description: categoryModelSchema.shape.description,
-  status: categoryModelSchema.shape.status,
+const categoryCreatePayloadSchema = categoryModelSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 })
 
-const categoryUpdatePayloadSchema = categoryCreatePayloadSchema.extend({
-  id: categoryModelSchema.shape.id,
-  name: categoryModelSchema.shape.name,
-  slug: categoryModelSchema.shape.slug,
-  description: categoryModelSchema.shape.description,
-  status: categoryModelSchema.shape.status,
-})
+const categoryUpdatePayloadSchema = categoryModelSchema.omit({ createdAt: true, updatedAt: true })
 
-const categoryDeletePayloadSchema = z.object({
-  id: categoryModelSchema.shape.id,
-})
+const categoryDeletePayloadSchema = categoryModelSchema.pick({ id: true })
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 3. RESPONSE SCHEMA — validate dữ liệu nhận từ API
