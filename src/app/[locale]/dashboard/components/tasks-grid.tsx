@@ -261,7 +261,7 @@ export function TasksGrid() {
 
         onRefresh: async () => {
           const result = await refetchCategories()
-          const items = result.data?.data.items ?? []
+          const items = result.data ?? []
           setRows(items)
           return items
         },
@@ -346,21 +346,10 @@ export function TasksGrid() {
   )
 
   useEffect(() => {
-    let mounted = true
-
-    void refetchCategories()
-      .then((result) => {
-        if (!mounted) return
-        setRows(result.data?.data.items ?? [])
-      })
-      .catch(() => {
-        if (!mounted) return
-        setRows([])
-      })
-
-    return () => {
-      mounted = false
-    }
+    refetchCategories().then((result) => {
+      const items = result.data ?? []
+      setRows(items)
+    })
   }, [refetchCategories])
 
   return (
