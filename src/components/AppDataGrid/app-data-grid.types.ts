@@ -5,6 +5,8 @@ export type OptionsSelect = { label: string; value: unknown }
 
 export type TKeyGrid = Key
 export type TComparator<TRow> = (a: TRow, b: TRow) => number
+export type TRowKey<TRow> = keyof TRow & string
+export type TAnyColumnKey<TRow, TSummaryRow> = TRowKey<TRow> | (keyof TSummaryRow & string) | string
 export type TColumn<TRow, TSummaryRow> = Column<TRow, TSummaryRow> & {
   type?:
     | 'DatePicker'
@@ -25,8 +27,20 @@ export type TColumn<TRow, TSummaryRow> = Column<TRow, TSummaryRow> & {
     | 'TreeView'
   visible?: boolean
   options?: OptionsSelect[]
+  key: TAnyColumnKey<TRow, TSummaryRow>
 }
 
-export type TGenColumn<TRow, TSummaryRow> = (
+export type TColumnWithRowKey<TRow, TSummaryRow, K extends TRowKey<TRow> = TRowKey<TRow>> = Omit<
+  TColumn<TRow, TSummaryRow>,
+  'key'
+> & {
+  key: K
+}
+
+export type TGenColumn<
+  TRow,
+  TSummaryRow,
+  K extends TAnyColumnKey<TRow, TSummaryRow> = TRowKey<TRow>,
+> = (
   direction: Direction,
-) => readonly TColumn<NoInfer<TRow>, NoInfer<TSummaryRow>>[]
+) => readonly (Omit<TColumn<NoInfer<TRow>, NoInfer<TSummaryRow>>, 'key'> & { key: K })[]

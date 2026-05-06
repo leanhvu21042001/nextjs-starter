@@ -150,7 +150,7 @@ Before finishing, run lint and build and fix any errors introduced by your chang
 
 Your new project is aligned if all are true:
 
-- No ApiResponse<unknown> or ApiPaginatedResponse<unknown> in src/domain/**/*.service.ts
+- No ApiResponse<unknown> or ApiPaginatedResponse<unknown> in src/domain/\*_/_.service.ts
 - Each feature has schema, mapper, DTO types, and service
 - API response parsing happens through mapper/schema flow
 - npm run lint passes

@@ -7,7 +7,7 @@ Find and fix all weakly typed service API calls.
 
 Checklist:
 
-1. Search src/domain/**/<feature>.service.ts for:
+1. Search src/domain/\*\*/<feature>.service.ts for:
 
 - ApiResponse<unknown>
 - ApiPaginatedResponse<unknown>

@@ -1,8 +1,7 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
-import { Direction, SelectCellFormatter, renderTextEditor } from 'react-data-grid'
-import { createPortal } from 'react-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { renderTextEditor } from 'react-data-grid'
 
 import {
   AppDataGrid,
@@ -11,117 +10,44 @@ import {
   type TComparator,
   type TGenColumn,
 } from '@/components/AppDataGrid'
-import { Box } from '@/components/ui'
+import { type TCategoryUi, categoryService } from '@/domain/category'
+import { formatters } from '@/lib/formatters'
 
-const dateFormatter = new Intl.DateTimeFormat(navigator.language)
-const currencyFormatter = new Intl.NumberFormat(navigator.language, {
-  style: 'currency',
-  currency: 'eur',
-})
+type CategoryRow = TCategoryUi
 
-interface Row {
-  id: number
-  title: string
-  client: string
-  area: string
-  country: string
-  contact: string
-  assignee: string
-  progress: number
-  startTimestamp: number
-  endTimestamp: number
-  budget: number
-  transaction: string
-  account: string
-  version: string
-  available: boolean
-}
-
-interface SummaryRow {
+interface CategorySummaryRow {
   id: string
   totalCount: number
-  yesCount: number
+  activeCount: number
 }
 
-let countries: string[] = []
-
-const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
-
-const withRandomFailure = async <T,>(task: () => T | Promise<T>, failRate = 0.25): Promise<T> => {
-  await delay(120 + Math.floor(Math.random() * 240))
-
-  if (Math.random() < failRate) {
-    throw new Error('Simulated network/server failure for demo purposes')
-  }
-
-  return task()
-}
-
-function createRows(): readonly Row[] {
-  const now = Date.now()
-  const rows: Row[] = []
-  const countrySet = new Set<string>()
-
-  for (let i = 0; i < 80; i++) {
-    const country = `Country #${Math.ceil(i / 50)}`
-    countrySet.add(country)
-
-    rows.push({
-      id: i,
-      title: `Task #${i + 1}`,
-      client: `Client #${i + 1}`,
-      area: `Area #${i + 1}`,
-      country,
-      contact: `contact${i + 1}@example.com`,
-      assignee: `Assignee #${i + 1}`,
-      progress: Math.random() * 100,
-      startTimestamp: now - Math.round(Math.random() * 1e10),
-      endTimestamp: now + Math.round(Math.random() * 1e10),
-      budget: 500 + Math.random() * 10500,
-      transaction: `Transaction #${i + 1}`,
-      account: `Account #${i + 1}`,
-      version: `Version #${i + 1}`,
-      available: Math.random() > 0.5,
-    })
-  }
-
-  countries = [...countrySet].sort(new Intl.Collator().compare)
-
-  return rows
-}
-
-function getComparator(sortColumn: string): TComparator<Row> {
+function getComparator(sortColumn: keyof CategoryRow): TComparator<CategoryRow> {
   switch (sortColumn) {
-    case 'assignee':
-    case 'title':
-    case 'client':
-    case 'area':
-    case 'country':
-    case 'contact':
-    case 'transaction':
-    case 'account':
-    case 'version':
-      return (a, b) => {
-        return a[sortColumn].localeCompare(b[sortColumn])
-      }
-    case 'available':
-      return (a, b) => {
-        return a[sortColumn] === b[sortColumn] ? 0 : a[sortColumn] ? 1 : -1
-      }
     case 'id':
-    case 'progress':
-    case 'startTimestamp':
-    case 'endTimestamp':
-    case 'budget':
+    case 'name':
+    case 'slug':
+    case 'description':
+    case 'status':
       return (a, b) => {
-        return a[sortColumn] - b[sortColumn]
+        const aValue = String(a[sortColumn]).trim() || ''
+        const bValue = String(b[sortColumn]).trim() || ''
+        return aValue.localeCompare(bValue)
+      }
+    case 'createdAt':
+    case 'updatedAt':
+      return (a, b) => {
+        const aValue = formatters.date.toDate(a[sortColumn])
+        const bValue = formatters.date.toDate(b[sortColumn])
+        if (!aValue || !bValue) return 0
+
+        return aValue.getTime() - bValue.getTime()
       }
     default:
       throw new Error(`unsupported sortColumn: "${sortColumn}"`)
   }
 }
 
-const genColumns: TGenColumn<Row, SummaryRow> = (direction: Direction) => {
+const genColumns: TGenColumn<CategoryRow, CategorySummaryRow> = () => {
   return [
     {
       key: 'id',
@@ -133,209 +59,126 @@ const genColumns: TGenColumn<Row, SummaryRow> = (direction: Direction) => {
       },
     },
     {
-      key: 'title',
-      name: 'Task',
+      key: 'name',
+      name: 'Category',
       frozen: true,
       renderEditCell: renderTextEditor,
-      renderSummaryCell({ row }: { row: SummaryRow }) {
+      renderSummaryCell({ row }: { row: CategorySummaryRow }) {
         return `${row.totalCount} records`
       },
     },
     {
-      key: 'client',
-      name: 'Client',
+      key: 'slug',
+      name: 'Slug',
       width: 'max-content',
       draggable: true,
       renderEditCell: renderTextEditor,
     },
     {
-      key: 'area',
-      name: 'Area',
+      key: 'description',
+      name: 'Description',
       renderEditCell: renderTextEditor,
     },
     {
-      key: 'country',
-      name: 'Country',
-      renderEditCell: ({
-        row,
-        onRowChange,
-      }: {
-        row: Row
-        onRowChange: (row: Row, commit?: boolean) => void
-      }) => (
+      key: 'status',
+      name: 'Status',
+      renderCell(props) {
+        return props.row.status
+      },
+      renderEditCell: ({ row, onRowChange }) => (
         <select
           autoFocus
-          value={row.country}
-          onChange={(e) => onRowChange({ ...row, country: e.target.value }, true)}
+          value={row.status}
+          onChange={(e) =>
+            onRowChange({ ...row, status: e.target.value as CategoryRow['status'] }, true)
+          }
         >
-          {countries.map((country) => (
-            <option key={country}>{country}</option>
-          ))}
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
         </select>
       ),
     },
     {
-      key: 'contact',
-      name: 'Contact',
-      renderEditCell: renderTextEditor,
-    },
-    {
-      key: 'assignee',
-      name: 'Assignee',
-      renderEditCell: renderTextEditor,
-    },
-    {
-      key: 'progress',
-      name: 'Completion',
-      renderCell(props) {
-        const value = props.row.progress
-        return (
-          <>
-            <progress max={100} value={value} style={{ inlineSize: 50 }} /> {Math.round(value)}%
-          </>
+      key: 'createdAt',
+      name: 'Created at',
+      renderCell(props: { row: CategoryRow }) {
+        return formatters.date.toDateTimeString(
+          formatters.date.toDate(props.row.createdAt) ?? new Date(),
+          'date',
         )
       },
-      renderEditCell({ row, onRowChange, onClose }) {
-        return createPortal(
-          <Box
-            dir={direction}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              placeItems: 'center',
-              background: 'rgb(0 0 0 / 10%)',
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Escape') {
-                onClose()
-              }
-            }}
-          >
-            <dialog
-              open
-              style={{
-                width: 300,
-              }}
-            >
-              <input
-                style={{ width: '100%' }}
-                autoFocus
-                type="range"
-                min="0"
-                max="100"
-                value={row.progress}
-                onChange={(e) => onRowChange({ ...row, progress: e.target.valueAsNumber })}
-              />
-              <menu
-                style={{
-                  textAlign: 'end',
-                }}
-              >
-                <button type="button" onClick={() => onClose()}>
-                  Cancel
-                </button>
-                <button type="button" onClick={() => onClose(true)}>
-                  Save
-                </button>
-              </menu>
-            </dialog>
-          </Box>,
-          document.body,
-        )
-      },
-      editorOptions: {
-        displayCellContent: true,
-      },
     },
     {
-      key: 'startTimestamp',
-      name: 'Start date',
-      renderCell(props: { row: Row }) {
-        return dateFormatter.format(props.row.startTimestamp)
-      },
-    },
-    {
-      key: 'endTimestamp',
-      name: 'Deadline',
-      renderCell(props: { row: Row }) {
-        return dateFormatter.format(props.row.endTimestamp)
-      },
-    },
-    {
-      key: 'budget',
-      name: 'Budget',
-      renderCell(props: { row: Row }) {
-        return currencyFormatter.format(props.row.budget)
-      },
-    },
-    {
-      key: 'transaction',
-      name: 'Transaction type',
-    },
-    {
-      key: 'account',
-      name: 'Account',
-    },
-    {
-      key: 'version',
-      name: 'Version',
-      renderEditCell: renderTextEditor,
-    },
-    {
-      key: 'available',
-      name: 'Available',
-      renderCell({
-        row,
-        onRowChange,
-        tabIndex,
-      }: {
-        row: Row
-        onRowChange: (row: Row, commit?: boolean) => void
-        tabIndex: number
-      }) {
-        return (
-          <SelectCellFormatter
-            value={row.available}
-            onChange={() => {
-              onRowChange({ ...row, available: !row.available })
-            }}
-            tabIndex={tabIndex}
-          />
+      key: 'updatedAt',
+      name: 'Updated at',
+      renderCell(props: { row: CategoryRow }) {
+        return formatters.date.toDateTimeString(
+          formatters.date.toDate(props.row.updatedAt) ?? new Date(),
+          'date',
         )
       },
       renderSummaryCell({
-        row: { yesCount, totalCount },
+        row: { activeCount, totalCount },
       }: {
-        row: { yesCount: number; totalCount: number }
+        row: { activeCount: number; totalCount: number }
       }) {
-        return `${Math.floor((100 * yesCount) / totalCount)}% ✔️`
+        if (totalCount === 0) {
+          return '0% active'
+        }
+
+        return `${Math.floor((100 * activeCount) / totalCount)}% active`
       },
     },
   ]
 }
 
 export function TasksGrid() {
-  const [rows, setRows] = useState<readonly Row[]>(createRows)
-  const dbRef = useRef<Row[]>(createRows() as Row[])
-
-  const nextNumericId = () =>
-    dbRef.current.reduce((max, row) => (row.id > max ? row.id : max), 0) + 1
+  const [rows, setRows] = useState<readonly CategoryRow[]>([])
 
   const createMutationResult = (
     action: 'add' | 'update' | 'delete',
-    row: Row,
+    row: CategoryRow,
     status: 'success' | 'error',
     error?: string,
-  ): MutationResultItem<Row> => ({
+  ): MutationResultItem<CategoryRow> => ({
     action,
-    key: String(row.id),
+    key: row.id,
     row,
     status,
     error,
   })
 
-  const toolbarConfig = useMemo<GridToolbarConfig<Row>>(
+  useEffect(() => {
+    let mounted = true
+
+    const loadCategories = async () => {
+      const response = await categoryService
+        .getList
+        // {
+        //   page: 1,
+        //   pageSize: 100
+        // }
+        ()
+
+      if (!mounted) {
+        return
+      }
+
+      setRows(response.data.items)
+    }
+
+    loadCategories().catch(() => {
+      if (mounted) {
+        setRows([])
+      }
+    })
+
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  const toolbarConfig = useMemo<GridToolbarConfig<CategoryRow>>(
     () => ({
       createMode: 'modal',
       updateMode: 'modal',
@@ -346,8 +189,8 @@ export function TasksGrid() {
         delayBetweenBatches: 60,
       },
       refreshParams: {
-        country: 'all',
-        minBudget: '0',
+        status: 'all',
+        search: '',
       },
       fieldConfigs: {
         id: {
@@ -356,162 +199,146 @@ export function TasksGrid() {
           showInAdd: false,
           showInEdit: false,
         },
-        title: {
-          key: 'title',
-          label: 'Task title',
+        name: {
+          key: 'name',
+          label: 'Category name',
           required: true,
           validate: (value) =>
-            String(value ?? '').trim().length < 3 ? 'Title must have at least 3 chars' : null,
+            String(value ?? '').trim().length < 2 ? 'Name must have at least 2 chars' : null,
         },
-        contact: {
-          key: 'contact',
-          label: 'Contact email',
+        slug: {
+          key: 'slug',
+          label: 'Slug',
           required: true,
           validate: (value) =>
-            /.+@.+\..+/.test(String(value ?? '')) ? null : 'Contact must be a valid email',
+            /^[a-z0-9-]*$/.test(String(value ?? '')) ? null : 'Slug format is invalid',
         },
-        budget: {
-          key: 'budget',
-          label: 'Budget',
-          required: true,
-          defaultValue: 1000,
-          validate: (value) => (Number(value) > 0 ? null : 'Budget must be greater than 0'),
+        description: {
+          key: 'description',
+          label: 'Description',
+          defaultValue: '',
         },
-        progress: {
-          key: 'progress',
-          label: 'Progress',
-          defaultValue: 0,
+        status: {
+          key: 'status',
+          label: 'Status',
+          defaultValue: 'active',
           validate: (value) => {
-            const n = Number(value)
-            return n >= 0 && n <= 100 ? null : 'Progress must be between 0 and 100'
+            const status = String(value)
+            return status === 'active' || status === 'inactive' ? null : 'Status is invalid'
           },
         },
-        startTimestamp: {
-          key: 'startTimestamp',
+        createdAt: {
+          key: 'createdAt',
           showInAdd: false,
           showInEdit: false,
         },
-        endTimestamp: {
-          key: 'endTimestamp',
+        updatedAt: {
+          key: 'updatedAt',
           showInAdd: false,
           showInEdit: false,
         },
       },
       handlers: {
-        onAdd: async (row) =>
-          withRandomFailure(() => {
-            const now = Date.now()
-            const persisted: Row = {
-              ...row,
-              id: nextNumericId(),
-              startTimestamp: row.startTimestamp ?? now,
-              endTimestamp: row.endTimestamp ?? now + 7 * 24 * 60 * 60 * 1000,
-            }
-            dbRef.current = [...dbRef.current, persisted]
-            setRows([...dbRef.current])
-            return persisted
-          }, 0.18),
+        onAdd: async (row) => {
+          const created = await categoryService.create(row)
+          setRows((prevRows) => [...prevRows, created])
+          return created
+        },
 
-        onUpdate: async (row) =>
-          withRandomFailure(() => {
-            dbRef.current = dbRef.current.map((item) =>
-              item.id === row.id ? { ...item, ...row } : item,
-            )
-            setRows([...dbRef.current])
-            return row
-          }, 0.22),
+        onUpdate: async (row) => {
+          const updated = await categoryService.update(row.id, row)
+          setRows((prevRows) => prevRows.map((item) => (item.id === updated.id ? updated : item)))
+          return updated
+        },
 
-        onDelete: async (row) =>
-          withRandomFailure(() => {
-            dbRef.current = dbRef.current.filter((item) => item.id !== row.id)
-            setRows([...dbRef.current])
-          }, 0.14),
+        onDelete: async (row) => {
+          await categoryService.delete(row.id)
+          setRows((prevRows) => prevRows.filter((item) => item.id !== row.id))
+        },
 
-        onRefresh: async (params) =>
-          withRandomFailure(() => {
-            const country = params?.country ?? 'all'
-            const minBudget = Number(params?.minBudget ?? 0)
-            const filtered = dbRef.current.filter((item) => {
-              const byCountry = country === 'all' ? true : item.country === country
-              const byBudget = item.budget >= minBudget
-              return byCountry && byBudget
-            })
+        onRefresh: async () =>
+          // params
+          {
+            // const status = params?.status
+            // const search = String(params?.search ?? '').trim()
 
-            setRows([...filtered])
-            return filtered
-          }, 0.1),
+            const response = await categoryService
+              .getList
+              // {
+              //   page: 1,
+              //   pageSize: 100,
+              //   search: search || undefined,
+              //   status: status === 'active' || status === 'inactive' ? status : undefined,
+              // }
+              ()
+
+            setRows(response.data.items)
+            return response.data.items
+          },
 
         onAddMany: async (items) => {
-          await delay(250)
+          const results = await Promise.all(
+            items.map(async (item) => {
+              try {
+                const created = await categoryService.create(item)
+                setRows((prevRows) => [...prevRows, created])
+                return createMutationResult('add', created, 'success')
+              } catch (error) {
+                return createMutationResult(
+                  'add',
+                  item,
+                  'error',
+                  error instanceof Error ? error.message : 'Cannot add category',
+                )
+              }
+            }),
+          )
 
-          const results = items.map((item) => {
-            if (String(item.title).toLowerCase().includes('fail')) {
-              return createMutationResult(
-                'add',
-                item,
-                'error',
-                'Title contains blocked keyword: fail',
-              )
-            }
-
-            const now = Date.now()
-            const persisted: Row = {
-              ...item,
-              id: nextNumericId(),
-              startTimestamp: item.startTimestamp ?? now,
-              endTimestamp: item.endTimestamp ?? now + 7 * 24 * 60 * 60 * 1000,
-            }
-            dbRef.current = [...dbRef.current, persisted]
-
-            return createMutationResult('add', persisted, 'success')
-          })
-
-          setRows([...dbRef.current])
           return results
         },
 
         onUpdateMany: async (items) => {
-          await delay(260)
+          const results = await Promise.all(
+            items.map(async (item) => {
+              try {
+                const updated = await categoryService.update(item.id, item)
+                setRows((prevRows) =>
+                  prevRows.map((dbItem) => (dbItem.id === updated.id ? updated : dbItem)),
+                )
 
-          const results = items.map((item) => {
-            if (item.progress < 0 || item.progress > 100) {
-              return createMutationResult(
-                'update',
-                item,
-                'error',
-                'Progress out of range (must be 0..100)',
-              )
-            }
+                return createMutationResult('update', updated, 'success')
+              } catch (error) {
+                return createMutationResult(
+                  'update',
+                  item,
+                  'error',
+                  error instanceof Error ? error.message : 'Cannot update category',
+                )
+              }
+            }),
+          )
 
-            dbRef.current = dbRef.current.map((dbItem) =>
-              dbItem.id === item.id ? { ...dbItem, ...item } : dbItem,
-            )
-
-            return createMutationResult('update', item, 'success')
-          })
-
-          setRows([...dbRef.current])
           return results
         },
 
         onDeleteMany: async (items) => {
-          await delay(180)
+          const results = await Promise.all(
+            items.map(async (item) => {
+              try {
+                await categoryService.delete(item.id)
+                setRows((prevRows) => prevRows.filter((dbItem) => dbItem.id !== item.id))
+                return createMutationResult('delete', item, 'success')
+              } catch (error) {
+                return createMutationResult(
+                  'delete',
+                  item,
+                  'error',
+                  error instanceof Error ? error.message : 'Cannot delete category',
+                )
+              }
+            }),
+          )
 
-          const results = items.map((item) => {
-            if (item.id % 11 === 0) {
-              return createMutationResult(
-                'delete',
-                item,
-                'error',
-                'Protected row cannot be deleted',
-              )
-            }
-
-            dbRef.current = dbRef.current.filter((dbItem) => dbItem.id !== item.id)
-            return createMutationResult('delete', item, 'success')
-          })
-
-          setRows([...dbRef.current])
           return results
         },
       },
@@ -521,21 +348,21 @@ export function TasksGrid() {
 
   return (
     <>
-      <AppDataGrid<Row, SummaryRow>
-        ariaLabel="Dashboard CRUD Grid Example"
+      <AppDataGrid<CategoryRow, CategorySummaryRow>
+        ariaLabel="Dashboard Category Grid"
         rowKeyGetterString="id"
-        exportFileName="dashboard-crud-grid"
+        exportFileName="dashboard-category-grid"
         rows={rows}
         genColumns={genColumns}
         genComparator={getComparator}
         toolbarConfig={toolbarConfig}
         isSearch
-        genSummaryRows={(rows) => {
+        genSummaryRows={(currentRows) => {
           return [
             {
               id: 'total_0',
-              totalCount: rows.length,
-              yesCount: rows.filter((r) => r.available).length,
+              totalCount: currentRows.length,
+              activeCount: currentRows.filter((row) => row.status === 'active').length,
             },
           ]
         }}

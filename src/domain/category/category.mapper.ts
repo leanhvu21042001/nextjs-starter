@@ -1,13 +1,7 @@
 import { createMapper } from '@/lib/create-mapper'
 
-import {
-  categoryCreatePayloadSchema,
-  categoryDeletePayloadSchema,
-  categoryResponseSchema,
-  categoryUiSchema,
-  categoryUpdatePayloadSchema,
-} from './category.schema'
-import type { CategoryModel } from './category.types'
+import { categorySchemas } from './category.schema'
+import { TCategoryUi } from './category.types'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPER — tự động tạo slug từ name nếu không được điền
@@ -24,16 +18,16 @@ function generateSlug(name: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// categoryMapper — dùng createMapper factory để enforce pattern chuẩn
+// Dùng createMapper factory để enforce pattern chuẩn
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const categoryMapper = createMapper({
   // Schemas
-  uiSchema: categoryUiSchema,
-  createPayloadSchema: categoryCreatePayloadSchema,
-  updatePayloadSchema: categoryUpdatePayloadSchema,
-  deletePayloadSchema: categoryDeletePayloadSchema,
-  responseSchema: categoryResponseSchema,
+  uiSchema: categorySchemas.ui,
+  createPayloadSchema: categorySchemas.createPayload,
+  updatePayloadSchema: categorySchemas.updatePayload,
+  deletePayloadSchema: categorySchemas.deletePayload,
+  responseSchema: categorySchemas.ui,
 
   // UI DTO → Create Payload
   toCreatePayload: (validated) => ({
@@ -52,14 +46,16 @@ export const categoryMapper = createMapper({
     status: validated.status,
   }),
 
-  // Response DTO → UI Model (Date thay string, rename nếu cần)
-  fromResponse: (validated): CategoryModel => ({
-    id: validated.id,
-    name: validated.name,
-    slug: validated.slug,
-    description: validated.description,
-    status: validated.status,
-    createdAt: new Date(validated.createdAt),
-    updatedAt: new Date(validated.updatedAt),
-  }),
+  // Response DTO → UI Model
+  fromResponse: (validated): TCategoryUi => {
+    return {
+      id: validated.id,
+      name: validated.name,
+      slug: validated.slug,
+      description: validated.description,
+      status: validated.status,
+      createdAt: validated.createdAt,
+      updatedAt: validated.updatedAt,
+    }
+  },
 })

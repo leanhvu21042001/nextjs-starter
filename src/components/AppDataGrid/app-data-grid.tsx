@@ -101,7 +101,7 @@ function AppDataGrid<TRow, TSummaryRow>({
   rows: readonly TRow[]
   // functions
   genColumns: TGenColumn<TRow, TSummaryRow> & { options?: OptionsSelect[] }
-  genComparator: (sortColumn: string) => TComparator<TRow>
+  genComparator: (sortColumn: keyof TRow) => TComparator<TRow>
   genSummaryRows?: (rows: readonly TRow[]) => readonly TSummaryRow[]
   onRowChange?: (rows: readonly TRow[], data: RowsChangeData<TRow, TSummaryRow>) => void
   toolbarConfig?: GridToolbarConfig<TRow>
@@ -185,7 +185,7 @@ function AppDataGrid<TRow, TSummaryRow>({
 
     return gridRows.toSorted((a, b) => {
       for (const sort of sortColumns) {
-        const compResult = genComparator(sort.columnKey)(a, b)
+        const compResult = genComparator(sort.columnKey as keyof TRow)(a, b)
         if (compResult !== 0) {
           return sort.direction === 'ASC' ? compResult : -compResult
         }

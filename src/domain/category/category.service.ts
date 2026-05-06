@@ -3,18 +3,11 @@ import type { ApiPaginatedResponse, ApiResponse } from '@/lib/api-response'
 import fetcher from '@/lib/fetcher'
 
 import { categoryMapper } from './category.mapper'
-import type { CategoryModel, CategoryResponseDto, CategoryUiDto } from './category.types'
+import { TCategoryUi } from './category.types'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // QUERY PARAMS
 // ─────────────────────────────────────────────────────────────────────────────
-
-export type GetCategoriesParams = {
-  page?: number
-  pageSize?: number
-  search?: string
-  status?: 'active' | 'inactive'
-}
 
 function withErrorContext(
   error: unknown,
@@ -39,10 +32,12 @@ export const categoryService = {
   /**
    * GET /categories — lấy danh sách categories (có phân trang)
    */
-  async getList(params?: GetCategoriesParams): Promise<ApiPaginatedResponse<CategoryModel>> {
+  async getList() // TODO: thêm params để filter/sort/paginate, ví dụ: { page: number; pageSize: number; status?: TCategoryStatus }
+  // params?: GetCategoriesParams
+  : Promise<ApiPaginatedResponse<TCategoryUi>> {
     try {
-      const data = await fetcher.get<ApiPaginatedResponse<CategoryResponseDto>>('/categories', {
-        params,
+      const data = await fetcher.get<ApiPaginatedResponse<TCategoryUi>>('/categories', {
+        // params,
       })
 
       return {
@@ -60,9 +55,9 @@ export const categoryService = {
   /**
    * GET /categories/:id — lấy chi tiết một category
    */
-  async getById(id: string): Promise<CategoryModel> {
+  async getById(id: string): Promise<TCategoryUi> {
     try {
-      const data = await fetcher.get<ApiResponse<CategoryResponseDto>>(`/categories/${id}`)
+      const data = await fetcher.get<ApiResponse<TCategoryUi>>(`/categories/${id}`)
       return categoryMapper.fromResponse(data.data)
     } catch (error) {
       throw withErrorContext(error, { resource: 'category', id })
@@ -73,12 +68,12 @@ export const categoryService = {
    * POST /categories — tạo mới category
    * @param uiData - dữ liệu từ form (sẽ được validate & transform bởi mapper)
    */
-  async create(uiData: CategoryUiDto): Promise<CategoryModel> {
+  async create(uiData: TCategoryUi): Promise<TCategoryUi> {
     // Mapper validate UI input → tạo API payload
     try {
       const payload = categoryMapper.create(uiData)
 
-      const data = await fetcher.post<ApiResponse<CategoryResponseDto>>('/categories', payload)
+      const data = await fetcher.post<ApiResponse<TCategoryUi>>('/categories', payload)
       return categoryMapper.fromResponse(data.data)
     } catch (error) {
       throw withErrorContext(error, { resource: 'category', name: uiData.name })
@@ -90,12 +85,12 @@ export const categoryService = {
    * @param id - ID của category cần update
    * @param uiData - dữ liệu từ form (sẽ được validate & transform bởi mapper)
    */
-  async update(id: string, uiData: CategoryUiDto): Promise<CategoryModel> {
+  async update(id: string, uiData: TCategoryUi): Promise<TCategoryUi> {
     // Mapper validate UI input → tạo API payload (kèm id)
     try {
       const payload = categoryMapper.update(uiData, id)
 
-      const data = await fetcher.put<ApiResponse<CategoryResponseDto>>(`/categories/${id}`, payload)
+      const data = await fetcher.put<ApiResponse<TCategoryUi>>(`/categories/${id}`, payload)
       return categoryMapper.fromResponse(data.data)
     } catch (error) {
       throw withErrorContext(error, { resource: 'category', id, name: uiData.name })

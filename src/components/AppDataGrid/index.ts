@@ -3,8 +3,10 @@ export { GridToolbar } from './toolbar'
 export type {
   OptionsSelect,
   TKeyGrid,
+  TRowKey,
   TComparator,
   TColumn,
+  TColumnWithRowKey,
   TGenColumn,
 } from './app-data-grid.types'
 export type {
