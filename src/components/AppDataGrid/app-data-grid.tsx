@@ -46,7 +46,7 @@ import type {
   TGenColumn,
   TKeyGrid,
 } from './app-data-grid.types'
-import { isNoSearch } from './app-data-grid.utils'
+import { isAtBottom, isNoSearch } from './app-data-grid.utils'
 import { runWithConcurrency } from './concurrency'
 import { GridToolbar } from './toolbar'
 import type {
@@ -158,6 +158,7 @@ function AppDataGrid<TRow, TSummaryRow>({
   // support states
   const gridRef = useRef<DataGridHandle>(null)
   const [isExporting, setIsExporting] = useState(false)
+  const [isLoadingLoadMore, setIsLoadingLoadMore] = useState(false)
   const rowIdSeed = useRef(0)
   const refreshRequestId = useRef(0)
 
@@ -588,10 +589,21 @@ function AppDataGrid<TRow, TSummaryRow>({
     setSelectedRows(nextSelectedRows)
   }
 
-  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+  const handleScroll = async (event: React.UIEvent<HTMLDivElement>) => {
     logger.debug('DataGrid scrolled', {
       eventType: event.type,
     })
+
+    // * Xử lý load more.
+    if (isLoadingLoadMore || !isAtBottom(event)) return
+    setIsLoadingLoadMore(true)
+    // const newRows = await loadMoreRows(50, rows.length);
+    // const newRows = []
+    setGridRows([
+      ...gridRows,
+      //  ...newRows
+    ])
+    setIsLoadingLoadMore(false)
   }
 
   const executeActionSingle = async (

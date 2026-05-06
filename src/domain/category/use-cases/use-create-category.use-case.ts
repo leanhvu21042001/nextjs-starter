@@ -6,13 +6,15 @@ import { categoryService } from '../category.service'
 import type { TCategoryUi } from '../category.types'
 import { categoryQueryKeys } from './query-keys'
 
-export const useCreateCategoryUseCase = (options?: TParametersUseMutation) => {
+export const useCreateCategoryUseCase = (
+  options?: TParametersUseMutation<TCategoryUi, TCategoryUi>,
+) => {
   const queryClient = useQueryClient()
 
   return useMutationBase({
     ...options,
-    mutationFn: async (data: unknown | TCategoryUi) => {
-      const response = await categoryService.create(data as TCategoryUi)
+    mutationFn: async (data: TCategoryUi) => {
+      const response = await categoryService.create(data)
       return response
     },
     onSuccess: (data, variables, onMutateResult, context) => {

@@ -5,12 +5,12 @@ import { TParametersUseMutation, useMutationBase } from '@/hooks/use-mutation-ba
 import { categoryService } from '../category.service'
 import { categoryQueryKeys } from './query-keys'
 
-export const useDeleteCategoryUseCase = (options?: TParametersUseMutation) => {
+export const useDeleteCategoryUseCase = (options?: TParametersUseMutation<void, string>) => {
   const queryClient = useQueryClient()
 
   return useMutationBase({
-    mutationFn: async (id: unknown) => {
-      return await categoryService.delete(id as string)
+    mutationFn: async (id: string) => {
+      return await categoryService.delete(id)
     },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
@@ -18,7 +18,7 @@ export const useDeleteCategoryUseCase = (options?: TParametersUseMutation) => {
         queryKey: categoryQueryKeys.getList(),
       })
       queryClient.removeQueries({
-        queryKey: categoryQueryKeys.getById(variables as string),
+        queryKey: categoryQueryKeys.getById(variables),
       })
       if (options?.onSuccess) {
         options.onSuccess(data, variables, onMutateResult, context)

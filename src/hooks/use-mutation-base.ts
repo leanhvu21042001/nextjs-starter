@@ -1,11 +1,19 @@
-import { useMutation } from '@tanstack/react-query'
+import { type DefaultError, type UseMutationOptions, useMutation } from '@tanstack/react-query'
 
-type TOptionsUseMutationBase = Parameters<typeof useMutation>[0]
-export type TParametersUseMutation = Parameters<typeof useMutation>[0]
+export type TParametersUseMutation<
+  TData,
+  TVariables = void,
+  TError = DefaultError,
+  TContext = unknown,
+> = Omit<UseMutationOptions<TData, TError, TVariables, TContext>, 'mutationFn'>
 
-export const useMutationBase = (options: TOptionsUseMutationBase) => {
-  return useMutation({
-    mutationFn: options.mutationFn,
-    ...options,
-  })
+export const useMutationBase = <
+  TData,
+  TVariables = void,
+  TError = DefaultError,
+  TContext = unknown,
+>(
+  options: UseMutationOptions<TData, TError, TVariables, TContext>,
+) => {
+  return useMutation<TData, TError, TVariables, TContext>(options)
 }

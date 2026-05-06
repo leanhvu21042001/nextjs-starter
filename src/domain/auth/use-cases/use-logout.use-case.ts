@@ -2,7 +2,7 @@ import { TParametersUseMutation, useMutationBase } from '@/hooks/use-mutation-ba
 
 import { authService } from '../auth.service'
 
-export const useLogoutUseCase = (options?: TParametersUseMutation) => {
+export const useLogoutUseCase = (options?: TParametersUseMutation<void>) => {
   return useMutationBase({
     mutationFn: async () => authService.logout(),
     ...options,

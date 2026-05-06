@@ -20,7 +20,6 @@ import {
   useGetCategoryUseCase,
   useUpdateCategoryUseCase,
 } from '@/domain/category'
-import type { ApiPaginatedResponse } from '@/lib/api-response'
 import { formatters } from '@/lib/formatters'
 import { DEFAULT_LOCALE, hasLocale } from '@/lib/i18n/config'
 
@@ -156,7 +155,7 @@ export function TasksGrid() {
   const content = getTasksGridContent(locale)
 
   const [rows, setRows] = useState<readonly CategoryRow[]>([])
-  const { refetch: refetchCategories } = useGetCategoryUseCase({ enabled: false })
+  const { data: categories, refetch: refetchCategories } = useGetCategoryUseCase({ enabled: false })
   const createCategoryMutation = useCreateCategoryUseCase()
   const updateCategoryMutation = useUpdateCategoryUseCase()
   const deleteCategoryMutation = useDeleteCategoryUseCase()
@@ -176,31 +175,6 @@ export function TasksGrid() {
     status,
     error,
   })
-
-  useEffect(() => {
-    let mounted = true
-
-    const loadCategories = async () => {
-      const result = await refetchCategories()
-      const response = result.data as ApiPaginatedResponse<CategoryRow> | undefined
-
-      if (!mounted) {
-        return
-      }
-
-      setRows(response?.data.items ?? [])
-    }
-
-    loadCategories().catch(() => {
-      if (mounted) {
-        setRows([])
-      }
-    })
-
-    return () => {
-      mounted = false
-    }
-  }, [refetchCategories])
 
   const toolbarConfig = useMemo<GridToolbarConfig<CategoryRow>>(
     () => ({
@@ -287,8 +261,7 @@ export function TasksGrid() {
 
         onRefresh: async () => {
           const result = await refetchCategories()
-          const response = result.data as ApiPaginatedResponse<CategoryRow> | undefined
-          const items = response?.data.items ?? []
+          const items = result.data?.data.items ?? []
           setRows(items)
           return items
         },
@@ -371,6 +344,24 @@ export function TasksGrid() {
       updateCategoryMutation,
     ],
   )
+
+  useEffect(() => {
+    let mounted = true
+
+    void refetchCategories()
+      .then((result) => {
+        if (!mounted) return
+        setRows(result.data?.data.items ?? [])
+      })
+      .catch(() => {
+        if (!mounted) return
+        setRows([])
+      })
+
+    return () => {
+      mounted = false
+    }
+  }, [refetchCategories])
 
   return (
     <AppDataGrid<CategoryRow, CategorySummaryRow>

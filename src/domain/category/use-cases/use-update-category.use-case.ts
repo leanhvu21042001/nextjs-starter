@@ -11,12 +11,14 @@ type TUpdateCategoryVariables = {
   data: TCategoryUi
 }
 
-export const useUpdateCategoryUseCase = (options?: TParametersUseMutation) => {
+export const useUpdateCategoryUseCase = (
+  options?: TParametersUseMutation<TCategoryUi, TUpdateCategoryVariables>,
+) => {
   const queryClient = useQueryClient()
 
   return useMutationBase({
-    mutationFn: async (variables: unknown) => {
-      const { id, data } = variables as TUpdateCategoryVariables
+    mutationFn: async (variables: TUpdateCategoryVariables) => {
+      const { id, data } = variables
       const response = await categoryService.update(id, data)
       return response
     },
@@ -26,7 +28,7 @@ export const useUpdateCategoryUseCase = (options?: TParametersUseMutation) => {
         queryKey: categoryQueryKeys.getList(),
       })
       queryClient.invalidateQueries({
-        queryKey: categoryQueryKeys.getById((variables as TUpdateCategoryVariables).id),
+        queryKey: categoryQueryKeys.getById(variables.id),
       })
       if (options?.onSuccess) {
         options.onSuccess(data, variables, onMutateResult, context)
