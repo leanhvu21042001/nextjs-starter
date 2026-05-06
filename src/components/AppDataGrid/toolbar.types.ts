@@ -59,6 +59,7 @@ export interface GridToolbarViewProps<TRow> {
   disabledActions?: Array<'add' | 'save' | 'update' | 'delete' | 'refresh'>
   isSaving: boolean
   isRefreshing: boolean
+  text: GridToolbarText
 
   mutationResults: MutationResultItem<TRow>[]
   selectedFailedKeys: Set<string>
@@ -75,6 +76,41 @@ export interface GridToolbarViewProps<TRow> {
 
   readError?: string | null
   writeError?: string | null
+}
+
+export interface GridToolbarText {
+  add: string
+  update: string
+  delete: (count: number) => string
+  saveChanges: string
+  saving: string
+  refresh: string
+  refreshing: string
+  success: (count: number) => string
+  failed: (count: number) => string
+  failedMutations: string
+  retryAll: string
+  retrySelected: (count: number) => string
+  retry: string
+  unknownError: string
+  actionKey: (action: string, key: string) => string
+}
+
+export interface AppDataGridText {
+  unknownError: string
+  requiredMessage: (label: string) => string
+  mutationFailedSummary: (count: number) => string
+  deleteConfirm: (count: number) => string
+  searchPlaceholder: string
+  exportToCsv: string
+  noRowsAvailable: string
+  addDialogTitle: string
+  editDialogTitle: string
+  formDescription: string
+  cancel: string
+  addToList: string
+  applyUpdate: string
+  toolbar: GridToolbarText
 }
 
 export type RowMutationMap = Record<string, { state: RowMutationState; error?: string }>

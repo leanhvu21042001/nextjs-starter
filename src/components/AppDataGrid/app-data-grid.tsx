@@ -50,6 +50,7 @@ import { isNoSearch } from './app-data-grid.utils'
 import { runWithConcurrency } from './concurrency'
 import { GridToolbar } from './toolbar'
 import type {
+  AppDataGridText,
   CrudAction,
   GridToolbarConfig,
   MutationResultItem,
@@ -67,10 +68,44 @@ type ToolbarField<TRow, TSummaryRow> = {
   config?: RowFieldConfig<TRow>
 }
 
-const normalizeErrorMessage = (error: unknown): string => {
+const defaultAppDataGridText: AppDataGridText = {
+  unknownError: 'Unknown error',
+  requiredMessage: (label) => `${label} is required`,
+  mutationFailedSummary: (count) => `${count} mutation(s) failed. Check details below and retry.`,
+  deleteConfirm: (count) => `Delete ${count} selected row(s)?`,
+  searchPlaceholder: 'Search',
+  exportToCsv: 'Export to CSV',
+  noRowsAvailable: 'No rows available',
+  addDialogTitle: 'Add new item',
+  editDialogTitle: 'Update item',
+  formDescription:
+    'Form fields are generated from the grid columns and toolbar field configuration.',
+  cancel: 'Cancel',
+  addToList: 'Add to list',
+  applyUpdate: 'Apply update',
+  toolbar: {
+    add: 'Add',
+    update: 'Update',
+    delete: (count) => (count > 0 ? `Delete (${count})` : 'Delete'),
+    saveChanges: 'Save changes',
+    saving: 'Saving...',
+    refresh: 'Refresh',
+    refreshing: 'Refreshing...',
+    success: (count) => `Success: ${count}`,
+    failed: (count) => `Failed: ${count}`,
+    failedMutations: 'Failed mutations',
+    retryAll: 'Retry all',
+    retrySelected: (count) => `Retry selected (${count})`,
+    retry: 'Retry',
+    unknownError: 'Unknown error',
+    actionKey: (action, key) => `${action} - key: ${key}`,
+  },
+}
+
+const normalizeErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof Error) return error.message
   if (typeof error === 'string') return error
-  return 'Unknown error'
+  return fallback
 }
 
 function AppDataGrid<TRow, TSummaryRow>({
@@ -89,6 +124,7 @@ function AppDataGrid<TRow, TSummaryRow>({
   genSummaryRows,
   onRowChange,
   toolbarConfig,
+  localeText,
 }: {
   // simple config
   rowKeyGetterString: keyof TRow
@@ -105,7 +141,20 @@ function AppDataGrid<TRow, TSummaryRow>({
   genSummaryRows?: (rows: readonly TRow[]) => readonly TSummaryRow[]
   onRowChange?: (rows: readonly TRow[], data: RowsChangeData<TRow, TSummaryRow>) => void
   toolbarConfig?: GridToolbarConfig<TRow>
+  localeText?: AppDataGridText
 }) {
+  const text = useMemo<AppDataGridText>(
+    () => ({
+      ...defaultAppDataGridText,
+      ...localeText,
+      toolbar: {
+        ...defaultAppDataGridText.toolbar,
+        ...(localeText?.toolbar ?? {}),
+      },
+    }),
+    [localeText],
+  )
+
   // support states
   const gridRef = useRef<DataGridHandle>(null)
   const [isExporting, setIsExporting] = useState(false)
@@ -317,7 +366,7 @@ function AppDataGrid<TRow, TSummaryRow>({
       const value = values[field.key as keyof TRow]
 
       if (field.config?.required && (value === '' || value === undefined || value === null)) {
-        errors[field.key] = `${field.label} is required`
+        errors[field.key] = text.requiredMessage(field.label)
         return
       }
 
@@ -595,7 +644,7 @@ function AppDataGrid<TRow, TSummaryRow>({
         key,
         row: sourceRow,
         status: 'error',
-        error: normalizeErrorMessage(result.reason),
+        error: normalizeErrorMessage(result.reason, text.unknownError),
       } satisfies MutationResultItem<TRow>
     })
   }
@@ -636,7 +685,7 @@ function AppDataGrid<TRow, TSummaryRow>({
 
       return await executeActionSingle(action, rowsForAction)
     } catch (error) {
-      const message = normalizeErrorMessage(error)
+      const message = normalizeErrorMessage(error, text.unknownError)
 
       return rowsForAction.map((row) => ({
         action,
@@ -686,7 +735,7 @@ function AppDataGrid<TRow, TSummaryRow>({
           nextMutations[resolvedKey] = { state: 'success' }
         }
       } else {
-        const message = result.error ?? result.message ?? 'Unknown error'
+        const message = result.error ?? result.message ?? text.unknownError
 
         nextMutations[key] = { state: 'error', error: message }
 
@@ -734,10 +783,10 @@ function AppDataGrid<TRow, TSummaryRow>({
 
       const failedCount = allResults.filter((item) => item.status === 'error').length
       if (failedCount > 0) {
-        setWriteError(`${failedCount} mutation(s) failed. Check details below and retry.`)
+        setWriteError(text.mutationFailedSummary(failedCount))
       }
     } catch (error) {
-      setWriteError(normalizeErrorMessage(error))
+      setWriteError(normalizeErrorMessage(error, text.unknownError))
     } finally {
       setIsSaving(false)
     }
@@ -763,7 +812,7 @@ function AppDataGrid<TRow, TSummaryRow>({
       const merged = [...addResults, ...updateResults, ...deleteResults]
       applyMutationResults(merged, { appendResults: true })
     } catch (error) {
-      setWriteError(normalizeErrorMessage(error))
+      setWriteError(normalizeErrorMessage(error, text.unknownError))
     } finally {
       setIsSaving(false)
     }
@@ -789,7 +838,7 @@ function AppDataGrid<TRow, TSummaryRow>({
     if (selectedRows.size === 0) return
 
     if (toolbarConfig?.requireDeleteConfirm) {
-      const confirmed = window.confirm(`Delete ${selectedRows.size} selected row(s)?`)
+      const confirmed = window.confirm(text.deleteConfirm(selectedRows.size))
       if (!confirmed) return
     }
 
@@ -865,7 +914,7 @@ function AppDataGrid<TRow, TSummaryRow>({
       setSelectedFailedKeys(new Set())
       setSelectedRows(new Set())
     } catch (error) {
-      setReadError(normalizeErrorMessage(error))
+      setReadError(normalizeErrorMessage(error, text.unknownError))
     } finally {
       if (requestId === refreshRequestId.current) {
         setIsRefreshing(false)
@@ -974,6 +1023,7 @@ function AppDataGrid<TRow, TSummaryRow>({
           }}
           readError={readError}
           writeError={writeError}
+          text={text.toolbar}
         />
 
         <Box className="flex flex-wrap items-center gap-2 rounded-none border-0 bg-transparent p-0 shadow-none">
@@ -984,13 +1034,13 @@ function AppDataGrid<TRow, TSummaryRow>({
                 setTableSearchTerm(value)
               }}
               value={tableSearchTerm}
-              placeholder="Search"
+              placeholder={text.searchPlaceholder}
               className="w-[280px]"
             />
           ) : null}
 
           <Button type="button" size="sm" variant="outline" onClick={handleExportToCsv}>
-            Export to CSV
+            {text.exportToCsv}
           </Button>
         </Box>
       </Box>
@@ -1030,7 +1080,14 @@ function AppDataGrid<TRow, TSummaryRow>({
         bottomSummaryRows={summaryRows}
         direction={direction}
         enableVirtualization={!isExporting}
-        renderers={{ noRowsFallback: <Empty title="No rows available" /> }}
+        renderers={{
+          noRowsFallback: (
+            <Empty
+              style={{ gridColumn: '1/-1', placeSelf: 'center' }}
+              title={text.noRowsAvailable}
+            />
+          ),
+        }}
         rowKeyGetter={handleRowKeyGetter}
         onSelectedRowsChange={onSelectedRowsChange}
         onRowsChange={handleRowsChange}
@@ -1049,10 +1106,10 @@ function AppDataGrid<TRow, TSummaryRow>({
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{formMode === 'add' ? 'Add new item' : 'Update item'}</DialogTitle>
-            <DialogDescription>
-              Form fields are generated from the grid columns and toolbar field configuration.
-            </DialogDescription>
+            <DialogTitle>
+              {formMode === 'add' ? text.addDialogTitle : text.editDialogTitle}
+            </DialogTitle>
+            <DialogDescription>{text.formDescription}</DialogDescription>
           </DialogHeader>
 
           <Box className="grid max-h-[60vh] grid-cols-1 gap-3 overflow-auto rounded-none border-0 bg-transparent p-0 shadow-none">
@@ -1079,10 +1136,10 @@ function AppDataGrid<TRow, TSummaryRow>({
                 setFormErrors({})
               }}
             >
-              Cancel
+              {text.cancel}
             </Button>
             <Button type="button" onClick={handleFormSubmit}>
-              {formMode === 'add' ? 'Add to list' : 'Apply update'}
+              {formMode === 'add' ? text.addToList : text.applyUpdate}
             </Button>
           </DialogFooter>
         </DialogContent>

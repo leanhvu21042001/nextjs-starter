@@ -13,6 +13,7 @@ export function GridToolbar<TRow>({
   disabledActions,
   isSaving,
   isRefreshing,
+  text,
   mutationResults,
   selectedFailedKeys,
   onToggleFailed,
@@ -39,7 +40,7 @@ export function GridToolbar<TRow>({
           onClick={onAdd}
           disabled={isSaving || isRefreshing || isDisabled('add', disabledActions)}
         >
-          Add
+          {text.add}
         </Button>
 
         <Button
@@ -51,7 +52,7 @@ export function GridToolbar<TRow>({
             isSaving || isRefreshing || selectedCount !== 1 || isDisabled('update', disabledActions)
           }
         >
-          Update
+          {text.update}
         </Button>
 
         <Button
@@ -63,7 +64,7 @@ export function GridToolbar<TRow>({
             isSaving || isRefreshing || selectedCount === 0 || isDisabled('delete', disabledActions)
           }
         >
-          Delete {selectedCount > 0 ? `(${selectedCount})` : ''}
+          {text.delete(selectedCount)}
         </Button>
 
         <Button
@@ -73,7 +74,7 @@ export function GridToolbar<TRow>({
           onClick={onSave}
           disabled={isSaving || isRefreshing || isDisabled('save', disabledActions)}
         >
-          {isSaving ? 'Saving...' : 'Save changes'}
+          {isSaving ? text.saving : text.saveChanges}
         </Button>
 
         <Button
@@ -83,12 +84,12 @@ export function GridToolbar<TRow>({
           onClick={onRefresh}
           disabled={isSaving || isRefreshing || isDisabled('refresh', disabledActions)}
         >
-          {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          {isRefreshing ? text.refreshing : text.refresh}
         </Button>
 
         <Box className="ml-auto flex items-center gap-2 rounded-none border-0 bg-transparent p-0 shadow-none">
-          <Badge variant="success">Success: {successItems.length}</Badge>
-          <Badge variant="destructive">Failed: {failedItems.length}</Badge>
+          <Badge variant="success">{text.success(successItems.length)}</Badge>
+          <Badge variant="destructive">{text.failed(failedItems.length)}</Badge>
         </Box>
       </Box>
 
@@ -101,9 +102,9 @@ export function GridToolbar<TRow>({
       {failedItems.length > 0 && (
         <Box className="rounded-md border border-amber-200/80 bg-amber-50 p-3 shadow-none">
           <Box className="mb-2 flex flex-wrap items-center gap-2 rounded-none border-0 bg-transparent p-0 shadow-none">
-            <Inline className="text-sm font-medium text-amber-900">Failed mutations</Inline>
+            <Inline className="text-sm font-medium text-amber-900">{text.failedMutations}</Inline>
             <Button type="button" size="sm" variant="secondary" onClick={onRetryAll}>
-              Retry all
+              {text.retryAll}
             </Button>
             <Button
               type="button"
@@ -112,7 +113,7 @@ export function GridToolbar<TRow>({
               onClick={onRetrySelected}
               disabled={selectedFailedKeys.size === 0}
             >
-              Retry selected ({selectedFailedKeys.size})
+              {text.retrySelected(selectedFailedKeys.size)}
             </Button>
           </Box>
 
@@ -128,13 +129,13 @@ export function GridToolbar<TRow>({
                   onChange={() => onToggleFailed(item.key)}
                 />
                 <Inline className="text-xs text-slate-700">
-                  {item.action.toUpperCase()} - key: {item.key}
+                  {text.actionKey(item.action.toUpperCase(), item.key)}
                 </Inline>
                 <Inline className="min-w-0 flex-1 truncate text-xs text-red-700">
-                  {item.error ?? item.message ?? 'Unknown error'}
+                  {item.error ?? item.message ?? text.unknownError}
                 </Inline>
                 <Button type="button" size="sm" variant="outline" onClick={() => onRetryOne(item)}>
-                  Retry
+                  {text.retry}
                 </Button>
               </Box>
             ))}

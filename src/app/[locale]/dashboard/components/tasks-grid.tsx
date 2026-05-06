@@ -3,8 +3,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { renderTextEditor } from 'react-data-grid'
 
+import { useParams } from 'next/navigation'
+
 import {
   AppDataGrid,
+  type AppDataGridText,
   type GridToolbarConfig,
   type MutationResultItem,
   type TComparator,
@@ -19,6 +22,9 @@ import {
 } from '@/domain/category'
 import type { ApiPaginatedResponse } from '@/lib/api-response'
 import { formatters } from '@/lib/formatters'
+import { DEFAULT_LOCALE, hasLocale } from '@/lib/i18n/config'
+
+import { getTasksGridContent } from './tasks-grid.content'
 
 type CategoryRow = TCategoryUi
 
@@ -54,43 +60,47 @@ function getComparator(sortColumn: keyof CategoryRow): TComparator<CategoryRow> 
   }
 }
 
-const genColumns: TGenColumn<CategoryRow, CategorySummaryRow> = () => {
-  return [
+const buildColumns = (
+  content: ReturnType<typeof getTasksGridContent>,
+): TGenColumn<CategoryRow, CategorySummaryRow> => {
+  return () => [
     {
       key: 'id',
-      name: 'ID',
+      name: content.columns.id,
       frozen: true,
       resizable: false,
       renderSummaryCell() {
-        return <strong>Total</strong>
+        return <strong>{content.columns.total}</strong>
       },
     },
     {
       key: 'name',
-      name: 'Category',
+      name: content.columns.category,
       frozen: true,
       renderEditCell: renderTextEditor,
       renderSummaryCell({ row }: { row: CategorySummaryRow }) {
-        return `${row.totalCount} records`
+        return content.columns.records(row.totalCount)
       },
     },
     {
       key: 'slug',
-      name: 'Slug',
+      name: content.columns.slug,
       width: 'max-content',
       draggable: true,
       renderEditCell: renderTextEditor,
     },
     {
       key: 'description',
-      name: 'Description',
+      name: content.columns.description,
       renderEditCell: renderTextEditor,
     },
     {
       key: 'status',
-      name: 'Status',
+      name: content.columns.status,
       renderCell(props) {
-        return props.row.status
+        return props.row.status === 'active'
+          ? content.columns.statusActive
+          : content.columns.statusInactive
       },
       renderEditCell: ({ row, onRowChange }) => (
         <select
@@ -100,14 +110,14 @@ const genColumns: TGenColumn<CategoryRow, CategorySummaryRow> = () => {
             onRowChange({ ...row, status: e.target.value as CategoryRow['status'] }, true)
           }
         >
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="active">{content.columns.statusActive}</option>
+          <option value="inactive">{content.columns.statusInactive}</option>
         </select>
       ),
     },
     {
       key: 'createdAt',
-      name: 'Created at',
+      name: content.columns.createdAt,
       renderCell(props: { row: CategoryRow }) {
         return formatters.date.toDateTimeString(
           formatters.date.toDate(props.row.createdAt) ?? new Date(),
@@ -117,7 +127,7 @@ const genColumns: TGenColumn<CategoryRow, CategorySummaryRow> = () => {
     },
     {
       key: 'updatedAt',
-      name: 'Updated at',
+      name: content.columns.updatedAt,
       renderCell(props: { row: CategoryRow }) {
         return formatters.date.toDateTimeString(
           formatters.date.toDate(props.row.updatedAt) ?? new Date(),
@@ -130,21 +140,29 @@ const genColumns: TGenColumn<CategoryRow, CategorySummaryRow> = () => {
         row: { activeCount: number; totalCount: number }
       }) {
         if (totalCount === 0) {
-          return '0% active'
+          return content.columns.activePercent(0)
         }
 
-        return `${Math.floor((100 * activeCount) / totalCount)}% active`
+        return content.columns.activePercent(Math.floor((100 * activeCount) / totalCount))
       },
     },
   ]
 }
 
 export function TasksGrid() {
+  const params = useParams<{ locale?: string }>()
+  const localeParam = params?.locale
+  const locale = localeParam && hasLocale(localeParam) ? localeParam : DEFAULT_LOCALE
+  const content = getTasksGridContent(locale)
+
   const [rows, setRows] = useState<readonly CategoryRow[]>([])
   const { refetch: refetchCategories } = useGetCategoryUseCase({ enabled: false })
   const createCategoryMutation = useCreateCategoryUseCase()
   const updateCategoryMutation = useUpdateCategoryUseCase()
   const deleteCategoryMutation = useDeleteCategoryUseCase()
+
+  const gridText = useMemo<AppDataGridText>(() => content.grid, [content.grid])
+  const genColumns = useMemo(() => buildColumns(content), [content])
 
   const createMutationResult = (
     action: 'add' | 'update' | 'delete',
@@ -201,36 +219,38 @@ export function TasksGrid() {
       fieldConfigs: {
         id: {
           key: 'id',
-          label: 'ID',
+          label: content.columns.id,
           showInAdd: false,
           showInEdit: false,
         },
         name: {
           key: 'name',
-          label: 'Category name',
+          label: content.fields.categoryName,
           required: true,
           validate: (value) =>
-            String(value ?? '').trim().length < 2 ? 'Name must have at least 2 chars' : null,
+            String(value ?? '').trim().length < 2 ? content.validation.nameMinLength : null,
         },
         slug: {
           key: 'slug',
-          label: 'Slug',
+          label: content.fields.slug,
           required: true,
           validate: (value) =>
-            /^[a-z0-9-]*$/.test(String(value ?? '')) ? null : 'Slug format is invalid',
+            /^[a-z0-9-]*$/.test(String(value ?? '')) ? null : content.validation.invalidSlug,
         },
         description: {
           key: 'description',
-          label: 'Description',
+          label: content.fields.description,
           defaultValue: '',
         },
         status: {
           key: 'status',
-          label: 'Status',
+          label: content.fields.status,
           defaultValue: 'active',
           validate: (value) => {
             const status = String(value)
-            return status === 'active' || status === 'inactive' ? null : 'Status is invalid'
+            return status === 'active' || status === 'inactive'
+              ? null
+              : content.validation.invalidStatus
           },
         },
         createdAt: {
@@ -265,18 +285,13 @@ export function TasksGrid() {
           setRows((prevRows) => prevRows.filter((item) => item.id !== row.id))
         },
 
-        onRefresh: async () =>
-          // params
-          {
-            // const status = params?.status
-            // const search = String(params?.search ?? '').trim()
-
-            const result = await refetchCategories()
-            const response = result.data as ApiPaginatedResponse<CategoryRow> | undefined
-            const items = response?.data.items ?? []
-            setRows(items)
-            return items
-          },
+        onRefresh: async () => {
+          const result = await refetchCategories()
+          const response = result.data as ApiPaginatedResponse<CategoryRow> | undefined
+          const items = response?.data.items ?? []
+          setRows(items)
+          return items
+        },
 
         onAddMany: async (items) => {
           const results = await Promise.all(
@@ -290,7 +305,7 @@ export function TasksGrid() {
                   'add',
                   item,
                   'error',
-                  error instanceof Error ? error.message : 'Cannot add category',
+                  error instanceof Error ? error.message : content.mutation.cannotAdd,
                 )
               }
             }),
@@ -317,7 +332,7 @@ export function TasksGrid() {
                   'update',
                   item,
                   'error',
-                  error instanceof Error ? error.message : 'Cannot update category',
+                  error instanceof Error ? error.message : content.mutation.cannotUpdate,
                 )
               }
             }),
@@ -338,7 +353,7 @@ export function TasksGrid() {
                   'delete',
                   item,
                   'error',
-                  error instanceof Error ? error.message : 'Cannot delete category',
+                  error instanceof Error ? error.message : content.mutation.cannotDelete,
                 )
               }
             }),
@@ -348,30 +363,35 @@ export function TasksGrid() {
         },
       },
     }),
-    [createCategoryMutation, deleteCategoryMutation, refetchCategories, updateCategoryMutation],
+    [
+      content,
+      createCategoryMutation,
+      deleteCategoryMutation,
+      refetchCategories,
+      updateCategoryMutation,
+    ],
   )
 
   return (
-    <>
-      <AppDataGrid<CategoryRow, CategorySummaryRow>
-        ariaLabel="Dashboard Category Grid"
-        rowKeyGetterString="id"
-        exportFileName="dashboard-category-grid"
-        rows={rows}
-        genColumns={genColumns}
-        genComparator={getComparator}
-        toolbarConfig={toolbarConfig}
-        isSearch
-        genSummaryRows={(currentRows) => {
-          return [
-            {
-              id: 'total_0',
-              totalCount: currentRows.length,
-              activeCount: currentRows.filter((row) => row.status === 'active').length,
-            },
-          ]
-        }}
-      />
-    </>
+    <AppDataGrid<CategoryRow, CategorySummaryRow>
+      ariaLabel={content.ariaLabel}
+      rowKeyGetterString="id"
+      exportFileName={content.exportFileName}
+      rows={rows}
+      genColumns={genColumns}
+      genComparator={getComparator}
+      toolbarConfig={toolbarConfig}
+      localeText={gridText}
+      isSearch
+      genSummaryRows={(currentRows) => {
+        return [
+          {
+            id: 'total_0',
+            totalCount: currentRows.length,
+            activeCount: currentRows.filter((row) => row.status === 'active').length,
+          },
+        ]
+      }}
+    />
   )
 }

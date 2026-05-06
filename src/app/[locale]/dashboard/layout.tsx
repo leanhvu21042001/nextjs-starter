@@ -1,6 +1,22 @@
-import { Box, Header, Link, Main, Nav, Paragraph } from '@/components/ui'
+import { notFound } from 'next/navigation'
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+import { Box, Header, Link, Main, Nav, Paragraph } from '@/components/ui'
+import { hasLocale } from '@/lib/i18n/config'
+
+import { getDashboardLayoutContent } from './layout.content'
+
+export default async function DashboardLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+  if (!hasLocale(locale)) notFound()
+
+  const content = getDashboardLayoutContent(locale)
+
   return (
     <Box className="min-h-screen rounded-none border-0 bg-transparent p-0 shadow-none">
       <Header className="w-full border-b border-[var(--line-soft)] bg-[var(--surface-strong)] px-4 py-3 sm:px-6 lg:px-8">
@@ -8,10 +24,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Box className="rounded-none border-0 bg-transparent p-0 shadow-none flex items-center justify-between gap-4">
             <Box className="rounded-none border-0 bg-transparent p-0 shadow-none">
               <Paragraph className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
-                Workspace
+                {content.workspaceLabel}
               </Paragraph>
               <Paragraph className="font-display text-xl font-bold text-[var(--text-primary)]">
-                Dashboard
+                {content.title}
               </Paragraph>
             </Box>
 
@@ -20,19 +36,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 href="/dashboard"
                 className="rounded-full px-3 py-1.5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--background-secondary)] hover:text-[var(--text-primary)]"
               >
-                Overview
+                {content.nav.overview}
               </Link>
               <Link
                 href="/dashboard/users"
                 className="rounded-full px-3 py-1.5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--background-secondary)] hover:text-[var(--text-primary)]"
               >
-                Users
+                {content.nav.users}
               </Link>
               <Link
                 href="/dashboard/settings"
                 className="rounded-full px-3 py-1.5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--background-secondary)] hover:text-[var(--text-primary)]"
               >
-                Settings
+                {content.nav.settings}
               </Link>
             </Nav>
           </Box>

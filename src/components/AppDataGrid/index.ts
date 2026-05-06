@@ -11,6 +11,7 @@ export type {
 } from './app-data-grid.types'
 export type {
   ConcurrencyConfig,
+  AppDataGridText,
   CrudAction,
   GridCrudHandlers,
   GridToolbarConfig,
