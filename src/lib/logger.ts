@@ -1,3 +1,10 @@
+import {
+  type RuntimeLogLevel,
+  getConfiguredLogLevel,
+  getNodeEnv,
+  shouldPersistClientLogToFile,
+} from './env'
+
 type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
 type LogMeta = Record<string, unknown>
@@ -19,29 +26,16 @@ const LEVEL_ORDER: Record<LogLevel, number> = {
 
 const isServer = typeof window === 'undefined'
 
-const normalizeLevel = (value?: string | null): LogLevel => {
-  if (!value) return process.env.NODE_ENV === 'production' ? 'info' : 'debug'
-
-  const normalized = value.toLowerCase()
-
-  if (
-    normalized === 'debug' ||
-    normalized === 'info' ||
-    normalized === 'warn' ||
-    normalized === 'error'
-  ) {
-    return normalized
+const normalizeLevel = (value?: RuntimeLogLevel): LogLevel => {
+  if (value) {
+    return value
   }
 
-  return process.env.NODE_ENV === 'production' ? 'info' : 'debug'
+  return getNodeEnv() === 'production' ? 'info' : 'debug'
 }
 
 const getConfiguredLevel = (): LogLevel => {
-  if (isServer) {
-    return normalizeLevel(process.env.LOG_LEVEL)
-  }
-
-  return normalizeLevel(process.env.NEXT_PUBLIC_LOG_LEVEL)
+  return normalizeLevel(getConfiguredLogLevel(isServer ? 'server' : 'client'))
 }
 
 const shouldLog = (level: LogLevel): boolean => {
@@ -72,7 +66,7 @@ const write = (level: LogLevel, message: string, meta?: LogMeta | Error) => {
     level,
     message,
     timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV ?? 'development',
+    env: getNodeEnv(),
     runtime,
     ...(normalizeMeta(meta) ? { meta: normalizeMeta(meta) } : {}),
   }
@@ -97,8 +91,7 @@ const write = (level: LogLevel, message: string, meta?: LogMeta | Error) => {
 
 const shouldPersistLogToFile = () => {
   if (isServer) return false
-  if (process.env.NEXT_PUBLIC_LOG_TO_FILE === 'false') return false
-  return true
+  return shouldPersistClientLogToFile()
 }
 
 const safeStringify = (value: unknown) => {

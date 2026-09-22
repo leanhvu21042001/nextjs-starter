@@ -1,23 +1,18 @@
 import { z } from 'zod'
 
+import { type ApiErrorResponse, apiErrorResponseSchema } from '@/lib/api-response'
 import { FetchError } from '@/lib/fetcher'
 
 import { ERROR_CODES, isErrorCode } from './error.codes'
 import { AppError } from './error.types'
 
-type ErrorBody = {
-  code?: string
-  message?: string
-  params?: Record<string, string | number | boolean>
-  error?: {
-    code?: string
-    message?: string
-    params?: Record<string, string | number | boolean>
-  }
+function toErrorBody(data: unknown): ApiErrorResponse | null {
+  const parsed = apiErrorResponseSchema.safeParse(data)
+  return parsed.success ? parsed.data : null
 }
 
 function getCodeFromErrorBody(data: unknown) {
-  const body = data as ErrorBody | undefined
+  const body = toErrorBody(data)
 
   if (isErrorCode(body?.code)) {
     return body.code
@@ -31,7 +26,7 @@ function getCodeFromErrorBody(data: unknown) {
 }
 
 function getParamsFromErrorBody(data: unknown) {
-  const body = data as ErrorBody | undefined
+  const body = toErrorBody(data)
 
   if (body?.params && typeof body.params === 'object') {
     return body.params
@@ -45,7 +40,7 @@ function getParamsFromErrorBody(data: unknown) {
 }
 
 function getCustomMessageFromErrorBody(data: unknown) {
-  const body = data as ErrorBody | undefined
+  const body = toErrorBody(data)
 
   if (typeof body?.message === 'string' && body.message.trim().length > 0) {
     return body.message

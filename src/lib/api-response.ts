@@ -1,7 +1,11 @@
 import { z } from 'zod'
 
-// ─── Generic API Response Wrapper ─────────────────────────────────────────────
-// Chuẩn response trả về từ API: { success, message, data }
+const errorParamsSchema = z.record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+const errorDetailSchema = z.object({
+  code: z.string().optional(),
+  message: z.string().optional(),
+  params: errorParamsSchema.optional(),
+})
 
 export const apiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
   z.object({
@@ -22,7 +26,13 @@ export const apiPaginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T
     }),
   })
 
-// ─── Inferred Types ───────────────────────────────────────────────────────────
+export const apiErrorResponseSchema = z.object({
+  success: z.boolean().optional(),
+  message: z.string().optional(),
+  code: z.string().optional(),
+  params: errorParamsSchema.optional(),
+  error: errorDetailSchema.optional(),
+})
 
 export type ApiResponse<T> = {
   success: boolean
@@ -40,3 +50,7 @@ export type ApiPaginatedResponse<T> = {
     pageSize: number
   }
 }
+
+export type ApiErrorParams = z.infer<typeof errorParamsSchema>
+export type ApiErrorDetail = z.infer<typeof errorDetailSchema>
+export type ApiErrorResponse = z.infer<typeof apiErrorResponseSchema>
