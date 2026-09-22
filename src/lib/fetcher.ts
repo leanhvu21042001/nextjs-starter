@@ -1,3 +1,5 @@
+import { getApiBaseUrl, getApiTimeout } from './env'
+
 type QueryPrimitive = string | number | boolean
 
 type QueryParams = Record<string, QueryPrimitive | null | undefined>
@@ -10,8 +12,8 @@ type RequestOptions = {
   signal?: AbortSignal
 }
 
-const DEFAULT_TIMEOUT = Number(process.env.NEXT_PUBLIC_API_TIMEOUT) || 10_000
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || ''
+const DEFAULT_TIMEOUT = getApiTimeout()
+const BASE_URL = getApiBaseUrl()
 
 function resolveBaseUrl() {
   if (!BASE_URL) {

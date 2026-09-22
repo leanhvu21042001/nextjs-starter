@@ -1,5 +1,6 @@
 import { appendFile, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
+import { z } from 'zod'
 
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -19,6 +20,16 @@ type IncomingLogPayload = {
 }
 
 const MAX_BODY_BYTES = 32 * 1024
+const MAX_META_BYTES = 16 * 1024
+
+const logPayloadSchema = z.object({
+  level: z.enum(['debug', 'info', 'warn', 'error']).optional(),
+  message: z.string().trim().min(1).max(2000).optional(),
+  timestamp: z.iso.datetime().optional(),
+  env: z.string().max(50).optional(),
+  runtime: z.enum(['server', 'client']).optional(),
+  meta: z.unknown().optional(),
+})
 
 const isAllowedOrigin = (request: NextRequest) => {
   const origin = request.headers.get('origin')
@@ -55,29 +66,27 @@ const getLogFileName = (level: LogLevel, timestamp: string) => {
 }
 
 const sanitizePayload = (payload: IncomingLogPayload) => {
-  const level: LogLevel =
-    payload.level === 'debug' ||
-    payload.level === 'info' ||
-    payload.level === 'warn' ||
-    payload.level === 'error'
-      ? payload.level
-      : 'info'
+  const parsed = logPayloadSchema.safeParse(payload)
+  const data = parsed.success ? parsed.data : {}
+  const timestamp = data.timestamp ?? new Date().toISOString()
+  const metaRaw = data.meta
+  let meta: unknown = undefined
 
-  const timestamp =
-    typeof payload.timestamp === 'string' && payload.timestamp.length > 0
-      ? payload.timestamp
-      : new Date().toISOString()
+  if (metaRaw !== undefined) {
+    const serializedMeta = safeStringify(metaRaw)
+    meta =
+      Buffer.byteLength(serializedMeta, 'utf8') > MAX_META_BYTES
+        ? '[TRUNCATED_META]'
+        : JSON.parse(serializedMeta)
+  }
 
   return {
-    level,
-    message:
-      typeof payload.message === 'string' && payload.message.length > 0
-        ? payload.message.slice(0, 2000)
-        : 'Unknown message',
+    level: (data.level ?? 'info') as LogLevel,
+    message: data.message ?? 'Unknown message',
     timestamp,
-    env: typeof payload.env === 'string' ? payload.env.slice(0, 50) : 'unknown',
-    runtime: payload.runtime === 'client' ? 'client' : 'server',
-    meta: payload.meta,
+    env: data.env ?? 'unknown',
+    runtime: data.runtime ?? 'server',
+    meta,
   }
 }
 
@@ -93,28 +102,33 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const contentLength = Number(request.headers.get('content-length') ?? '0')
-  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
-    return NextResponse.json(
-      {
-        code: ERROR_CODES.NET_PAYLOAD_TOO_LARGE,
-        message: 'Payload too large',
-        params: { maxBytes: MAX_BODY_BYTES },
-      },
-      { status: 413 },
-    )
-  }
-
   try {
-    const body = (await request.json()) as IncomingLogPayload
+    const rawBody = await request.text()
+    const bodySize = Buffer.byteLength(rawBody, 'utf8')
+    if (bodySize > MAX_BODY_BYTES) {
+      return NextResponse.json(
+        {
+          code: ERROR_CODES.NET_PAYLOAD_TOO_LARGE,
+          message: 'Payload too large',
+          params: { maxBytes: MAX_BODY_BYTES },
+        },
+        { status: 413 },
+      )
+    }
+
+    const body = JSON.parse(rawBody) as IncomingLogPayload
     const payload = sanitizePayload(body)
 
     const logDir = join(process.cwd(), '.log')
     const fileName = getLogFileName(payload.level, payload.timestamp)
     const filePath = join(logDir, fileName)
 
-    await mkdir(logDir, { recursive: true })
-    await appendFile(filePath, `${safeStringify(payload)}\n`, 'utf8')
+    try {
+      await mkdir(logDir, { recursive: true })
+      await appendFile(filePath, `${safeStringify(payload)}\n`, 'utf8')
+    } catch {
+      // Never let logging failures break application flow.
+    }
 
     return NextResponse.json({ ok: true }, { status: 201 })
   } catch {
